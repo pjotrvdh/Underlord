@@ -1,63 +1,58 @@
-# Underlord
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-A browser game in the spirit of *Dungeon Keeper*. You are an evil overlord deep underground: dig into a cloud-covered map, claim territory, build rooms, attract creatures through portals and defend your Dungeon Heart against six invasions from the surface.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-The game is [`underlord.html`](underlord.html), with its settings in [`config/`](config) (YAML) and its graphics in [`assets/`](assets) (SVG). It has no build step and no dependencies.
+## About Laravel
 
-**Play it:** https://claude.ai/artifact/KpshEgP4ECCxr4pLyG13Rr (private artifact; saves go to your Claude account)
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-## Running locally
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-You can open `underlord.html` straight from disk. In that case it uses the copy of the settings embedded in the file, and saves go to the browser's `localStorage`. To use your edited `config/*.yml` files directly, serve the folder instead:
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-```bash
-python3 -m http.server 8765
-```
+## Learning Laravel
 
-Then open http://localhost:8765/underlord.html.
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-## Modding
+In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-- **Settings** live in [`config/`](config):
-  - `game.yml`: start gold, storage, wages, timings, Heart, portals and waves
-  - `creatures.yml`: every creature and hero, including their stats, wages, pool and room requirements
-  - `rooms.yml`, `spells.yml`, `waves.yml`
-  - `assets.yml`: which SVG file is used for what
+You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
 
-  After editing a file, run `node tools/sync-config.cjs` so the copy inside `underlord.html` matches.
-- **Graphics** are SVGs in [`assets/`](assets). See [`assets/README.md`](assets/README.md) for the size and orientation conventions.
+## Agentic Development
 
-## How to play
-
-- **Dig:** click a block to mark it for digging, or drag to mark a whole rectangle. You can mark blocks inside the clouds too. Your imps dig the blocks out, carry the gold to the Heart or a Treasury, and claim the new floor.
-- **Walls:** idle imps reinforce the earth walls around your territory. Heroes take much longer to tunnel through a reinforced wall.
-- **Explore:** the map is hidden in clouds. Your units reveal what they can see, and walls block their sight. Gold seams and the two portals shine through the clouds. Hidden caverns hold treasure chests, wandering creatures that join you, and a camp of sleeping heroes.
-- **Build:** you build rooms on claimed ground by clicking a tile or dragging a rectangle. The rooms are Treasury, Lair, Hatchery, Training Room and Library.
-- **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
-- **Hand:** left-click a creature to pick it up (you can hold up to 8), then left-click your territory to drop it. A creature dropped into a Training Room, Library, Lair or Hatchery starts working there right away, with a small bonus. A dropped creature is dazed for a moment. If you drop one on your own portal, you dismiss it. Right-click slaps a creature, and slapped imps work faster.
-- **Spells:** Create Imp, Lightning, Heal and Call to Arms. You unlock the last three through research in the Library.
-- **Control panel:** it is laid out like Dungeon Keeper's, with a minimap at the top (click it to jump there), then Info, Rooms, Spells and Creatures tabs. The Creatures tab shows, for each type, how many are idle, working and fighting. Click a number to pick one of them up, or right-click it to look at it.
-- **Computer Assistant:** the **C** button on the minimap lets the computer play for you, in one of four modes: Aggressive, Defensive, Construction only or Move only.
-- **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
-
-### Controls
-
-| Action | Mouse / touch | Keyboard |
-|---|---|---|
-| Mark for digging / build | click or drag | |
-| Slap | right-click | |
-| Scroll the map | right- or middle-drag, the **Look** tool, two-finger drag | arrow keys / WASD |
-| Zoom | mouse wheel, pinch, **+ / − / Fit** buttons | `+` / `-` |
-| Pause | **Pause** button | `Space` / `P` |
-| Game speed | **1×** button | `1` `2` `3` |
-| Back to the hand tool | | `Esc` |
-| Cheats panel | **Cheats** button | `` ` `` |
-
-## Development
+Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
 
 ```bash
-node tools/sim.cjs 700
-node tools/sim.cjs 1400 --cpu=aggressive
+composer require laravel/boost --dev
+
+php artisan boost:install
 ```
 
-This runs the real game logic headless for 700 simulated seconds. It plays a scripted opening (or, with `--cpu`, lets the Computer Assistant play), prints status lines and checks that a save/load round trip works. See [`AGENTS.md`](AGENTS.md) for how to work on the project, and [`.docs/`](.docs) for the game design and the code architecture.
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+
+## Contributing
+
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+
+## Code of Conduct
+
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
