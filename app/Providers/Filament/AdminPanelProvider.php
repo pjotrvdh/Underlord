@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('Underlord')
+            ->favicon(asset('favicon.svg'))
             ->unsavedChangesAlerts()
             ->defaultAvatarProvider(GravatarProvider::class)
             ->spa()
