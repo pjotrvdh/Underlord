@@ -147,6 +147,47 @@ All economy numbers live in the `ECON` object, so the planned difficulty setting
 | Heal | 400 | 200 | full heal for your units within 2.5 tiles |
 | Call to Arms | 800 | 300 | all creatures gather at the spot for 20 s |
 
+## Control panel (after Dungeon Keeper 1)
+
+From top to bottom:
+
+- **Minimap:** shows the whole map. Click or drag it to move the view; the white rectangle is what you are looking at.
+- **"C" button:** the Computer Assistant.
+- **Hand tools:** Hand, Slap and Look.
+- **Tabs:**
+  - **Info (?):** a payday gauge (wages due turn red when you can't pay them), a research gauge towards the next spell, and the Portal panel (the creature pool and room requirements).
+  - **Rooms** and **Spells.**
+  - **Creatures:** a grid with one row per creature type (portrait, then counts of **Idle / Working / Fighting**). Left-click a number to pick up the next creature in that state; right-click it to look at that creature. Left-click a portrait to pick up the most experienced creature of that type. Below the grid is a list of every creature with its level, health and current job; click one to look at it.
+- The chosen tab is remembered per browser.
+
+## Computer Assistant
+
+The "C" button, with the four modes from DK1. The assistant makes a decision every `assistant.interval` seconds:
+
+| Mode | Builds (dig, rooms, imps) | Moves creatures | Spells |
+|---|---|---|---|
+| Aggressive | yes | yes | Lightning on hero groups anywhere, Call to Arms at the heroes |
+| Defensive | yes | yes | Lightning on heroes near the Heart; Heal on creatures losing a fight |
+| Construction only | yes | | |
+| Move only | | yes | |
+
+- **Building:**
+  1. Tunnel to the nearest portal until one is claimed.
+  2. Tunnel to the nearest gold seam while storage has room (gems only when gold is low).
+  3. Build rooms in this order, next to existing rooms of the same type:
+     - Lair (creatures + 2)
+     - Hatchery 4
+     - Treasury (+4 when it is 75% full)
+     - Training Room 9 and Library 9, once you have 3 creatures
+     - Hatchery 9 and Lair 9, once you have 5 creatures
+  4. Dig a 3 × 3 block next to the territory when floor space runs out.
+  5. Summon imps up to `startCount + claimed / impsPerClaimed` (at most `maxImps`).
+  
+  It always keeps `reserveGold` aside and never has more than `maxMarks` blocks marked.
+- **Moving:** when heroes are visible, it drops up to 3 healthy creatures from far away onto claimed ground near the hero closest to the Heart. In peace time it drops idle creatures into the Training Room.
+- **Saving:** the setting (on/off and mode) is stored in the save.
+- **Sim results:** with `node tools/sim.cjs 1400 --cpu=defensive` (or `aggressive`), the assistant beats all six waves at about 1140 s.
+
 ## Hand of Evil
 
 Modelled on Dungeon Keeper 2:

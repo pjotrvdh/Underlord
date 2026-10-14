@@ -31,6 +31,8 @@ The owner (pjotr, Dutch-speaking) asked for these things, in this order. Keep th
 
 16. **Picking up and dropping creatures as in Dungeon Keeper 2** (ludo.guide DK2 Hand of Evil guide): left-click to pick up and to drop, and you can carry several. A creature dropped in a room starts working there with a +10% bonus, and a creature landing is briefly stunned. We could not confirm whether DK only lets you pick up on your own territory, so pick-up works everywhere and dropping only on your own territory.
 
+17. **Computer Assistant toggle and a DK-style control panel** (ludo.guide's DK1 control panel guide): a minimap with a "C" assistant button, tabs (Info, Rooms, Spells, Creatures), and a Creatures tab with Idle/Working/Fighting counts that you can click. DK1's Manufacture tab is left out because there is no Workshop or traps yet. The assistant's four modes are DK1's. How it decides is our own design.
+
 ## Our own balancing decisions
 
 These came out of the headless simulation:

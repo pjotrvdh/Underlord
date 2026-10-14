@@ -65,6 +65,47 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
 .held button{font-size:12px;padding:3px 7px;display:inline-flex;gap:5px;align-items:center}
 .held button.top{border-color:var(--gold)}
 .held .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.mm{position:relative}
+#mini{position:static;display:block;width:100%;aspect-ratio:40/26;background:#070505;border:1px solid var(--line);border-radius:3px;cursor:pointer;touch-action:none}
+.cpu{position:absolute;top:6px;right:6px;width:30px;height:30px;padding:0;font-family:var(--f-display);font-size:18px;background:rgba(22,16,14,.9)}
+.cpu[aria-pressed="true"]{background:#3a1512;border-color:var(--blood-hi);color:#ffd2c8;box-shadow:0 0 10px rgba(224,72,60,.5)}
+.cpu-modes{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.cpu-modes .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.cpu-modes button{font-size:12px;padding:4px 6px}
+.cpu-modes button[aria-pressed="true"]{border-color:var(--blood-hi);background:#2c1412;color:var(--ink)}
+.tools.hand{grid-template-columns:1fr 1fr 1fr}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;font-size:17px;line-height:1}
+.tabs button span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tabs button[aria-selected="true"]{border-color:var(--blood-hi);background:#2c1412}
+.tabs button[aria-selected="true"] span{color:var(--ink)}
+.tab{display:flex;flex-direction:column;gap:10px}
+.tab h3{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0}
+.gauge{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.glabel{display:flex;justify-content:space-between;gap:8px;color:var(--muted)}
+.glabel b{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.glabel b.bad{color:#f08a7e}
+.gbar{height:7px;background:#1f1512;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.gbar i{display:block;height:100%;width:0;background:var(--gold)}
+.gbar.res i{background:var(--violet)}
+.crgrid{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,52px);gap:3px 4px;align-items:center;font-size:12px}
+.crgrid .h{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center}
+.crgrid .who{display:flex;align-items:center;gap:6px;padding:2px 4px;background:none;border:1px solid transparent;text-align:left;min-width:0}
+.crgrid .who:hover:not(:disabled){border-color:var(--line)}
+.crgrid .who img,.crgrid .who i{width:26px;height:26px;flex:none}
+.crgrid .who i{border-radius:50%;width:12px;height:12px;margin:7px}
+.crgrid .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crgrid .num{padding:4px 0;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.crgrid .num.f{color:#f08a7e}
+.crhint{font-size:11px;color:var(--muted);margin:0;line-height:1.35}
+.crlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:12px}
+.crlist li button{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 28px 54px;gap:6px;align-items:center;padding:3px 6px;text-align:left;background:none;border-color:transparent}
+.crlist li button:hover{border-color:var(--line);background:#1e1613}
+.crlist .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crlist .nm small{color:var(--muted)}
+.crlist .hp{height:5px;background:#1f1512;border-radius:2px;overflow:hidden}
+.crlist .hp i{display:block;height:100%;background:#5fcf6a}
+.crlist .lv{color:var(--gold);font-variant-numeric:tabular-nums;text-align:right}
 .log{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.35;display:flex;flex-direction:column;gap:4px}
 .log li{color:var(--muted)}
 .log li:first-child{color:var(--ink)}
@@ -140,10 +181,38 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
   </main>
 
   <aside>
-    <section><h2>Hand</h2><div class="tools" id="tHand"></div><div class="held" id="held" hidden></div></section>
-    <section><h2>Rooms</h2><div class="tools" id="tRooms"></div></section>
-    <section><h2>Spells</h2><div class="tools" id="tSpells"></div></section>
-    <section><h2>Portal</h2><ul class="pool" id="pool"></ul></section>
+    <div class="mm">
+      <canvas id="mini" aria-label="Minimap. Click or drag to move the view."></canvas>
+      <button id="bCpu" class="cpu" type="button" aria-pressed="false" title="Computer Assistant: let the computer play for you">C</button>
+    </div>
+    <div class="cpu-modes" id="cpuModes" hidden>
+      <span>Computer Assistant</span>
+      <div class="seg" id="cpuSeg">
+        <button type="button" data-mode="aggressive">Aggressive</button>
+        <button type="button" data-mode="defensive">Defensive</button>
+        <button type="button" data-mode="construction">Construction only</button>
+        <button type="button" data-mode="move">Move only</button>
+      </div>
+    </div>
+    <div><div class="tools hand" id="tHand"></div><div class="held" id="held" hidden></div></div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button type="button" role="tab" data-tab="info" title="Information">?<span>Info</span></button>
+      <button type="button" role="tab" data-tab="rooms" title="Rooms">▦<span>Rooms</span></button>
+      <button type="button" role="tab" data-tab="spells" title="Spells">✦<span>Spells</span></button>
+      <button type="button" role="tab" data-tab="creatures" title="Creatures">☗<span>Creatures</span></button>
+    </div>
+    <section class="tab" id="tab-info" role="tabpanel">
+      <div class="gauge"><div class="glabel"><span>Payday</span><b id="gPayTxt"></b></div><div class="gbar"><i id="gPay"></i></div></div>
+      <div class="gauge"><div class="glabel"><span>Research</span><b id="gResTxt"></b></div><div class="gbar res"><i id="gRes"></i></div></div>
+      <h3>Portal</h3><ul class="pool" id="pool"></ul>
+    </section>
+    <section class="tab" id="tab-rooms" role="tabpanel" hidden><div class="tools" id="tRooms"></div></section>
+    <section class="tab" id="tab-spells" role="tabpanel" hidden><div class="tools" id="tSpells"></div></section>
+    <section class="tab" id="tab-creatures" role="tabpanel" hidden>
+      <div class="crgrid" id="crGrid"></div>
+      <p class="crhint">Click a number to pick up a creature doing that. Right-click to look at it. Click a portrait to pick up the most experienced one.</p>
+      <ul class="crlist" id="crList"></ul>
+    </section>
     <div class="info" id="info">Hover over the map for details.</div>
     <section><h2>Chronicle</h2><ul class="log" id="log"></ul></section>
   </aside>
@@ -190,6 +259,13 @@ hand:
   capacity: 8          # creatures the Hand of Evil can hold at once
   dropStun: 1.0        # seconds a dropped creature is dazed (as in Dungeon Keeper 2)
   workBoost: 1.1       # work-speed bonus for a creature dropped straight into a room
+
+assistant:             # the Computer Assistant ("C" button), modelled on Dungeon Keeper 1
+  interval: 1.5         # seconds between decisions
+  maxMarks: 24          # it won't mark more blocks for digging than this at once
+  reserveGold: 300      # gold it keeps aside when building or casting
+  maxImps: 12
+  impsPerClaimed: 35    # one extra imp per this many claimed tiles
 
 walls:
   hp: 8                 # hits to dig through a reinforced wall
@@ -365,10 +441,13 @@ function spr(k,x,y,w,h,flip=false){
 }
 applyConfig(embeddedConfig());
 
-const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), stage=document.getElementById('stage');
+const cv=document.getElementById('cv'), mainCtx=cv.getContext('2d'), stage=document.getElementById('stage');
 const fogC=document.createElement('canvas');fogC.width=W;fogC.height=H;const fogX=fogC.getContext('2d');
 const layer=document.createElement('canvas'),lctx=layer.getContext('2d');
 const cloud=document.createElement('canvas'),cctx=cloud.getContext('2d');
+// Drawing helpers all use `ctx`; it is pointed at an offscreen canvas while the terrain and fog caches are rendered.
+let ctx=mainCtx;
+const terr=document.createElement('canvas');let terrKey='',fogKey='',fogT=0;
 let TS=24, BASE=24, Z=1.7, SW=600, SH=400, cam={x:0,y:0}, camInit=false, DPR=1, G=null, running=false, paused=false, speed=1, tool='hand';
 let hover={x:-1,y:-1,fx:0,fy:0,in:false}, drag=null;
 const rand=n=>Math.floor(Math.random()*n);
@@ -455,7 +534,7 @@ function newGame(){
   G={t:null,room:new Uint8Array(N),mark:new Uint8Array(N),hp:new Uint8Array(N),gold:new Int16Array(N),seen:new Uint8Array(N),loot:new Int16Array(N),
      res:new Map(),rc:[0,0,0,0,0,0],ents:[],fx:[],money:ECON.startGold,heartHP:CFG.heart.hp,heartMax:CFG.heart.hp,heartFlash:0,
      time:0,nextWave:CFG.waves.first,zapT:0,wave:0,spawnQ:[],research:0,payT:ECON.payInterval,pown:new Uint8Array(N),pool:Object.fromEntries(Object.keys(ATTRACT).map(k=>[k,KINDS[k].pool])),portalT:CFG.portal.firstArrival,idc:1,
-     held:[],over:null,rally:null,msgCd:{},visT:0};
+     held:[],over:null,rally:null,msgCd:{},visT:0,cpu:{on:!!(G&&G.cpu&&G.cpu.on),mode:(G&&G.cpu&&G.cpu.mode)||'defensive',t:0}};
   genMap();
   const ring=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM)ring.push(i);
   for(let k=0;k<CFG.imp.startCount;k++){const i=ring[rand(ring.length)];spawn('imp',tx(i),ty(i));}
@@ -466,6 +545,7 @@ function newGame(){
   msg('Click or drag over earth to mark it for digging.');
   msg('Build a Treasury: your Heart holds only '+HEART_CAP+' gold.');
   if(camInit)centerOn(G.hx,G.hy);
+  syncCpu();
 }
 
 /* ---------- vision ---------- */
@@ -742,6 +822,7 @@ function update(dt){
   for(const e of G.ents)if(!e.dead&&!e.held)tick(e,dt);
   G.ents=G.ents.filter(e=>!e.dead);
   if((G.visT-=dt)<=0){G.visT=.25;vision();}
+  cpuTick(dt);
   for(const f of G.fx)f.t+=dt;G.fx=G.fx.filter(f=>f.t<f.dur);
   if(G.heartHP<=0){G.heartHP=0;end(false);}
   else if(G.wave>=WAVES.length&&!G.spawnQ.length&&!G.ents.some(e=>e.side===1&&!e.guard))end(true);
@@ -769,7 +850,7 @@ function serialize(){
   return {v:SAVE_V,savedAt:Date.now(),
     t:Array.from(G.t),room:Array.from(G.room),mark:Array.from(G.mark),hp:Array.from(G.hp),gold:Array.from(G.gold),seen:Array.from(G.seen),loot:Array.from(G.loot),
     money:G.money,heartHP:G.heartHP,heartMax:G.heartMax,time:G.time,nextWave:G.nextWave,wave:G.wave,spawnQ:G.spawnQ,research:G.research,
-    payT:G.payT,pown:Array.from(G.pown),pool:G.pool,portals:G.portals,portalT:G.portalT,idc:G.idc,hx:G.hx,hy:G.hy,portal:G.portal,gate:G.gate,rally:G.rally,
+    cpu:G.cpu,payT:G.payT,pown:Array.from(G.pown),pool:G.pool,portals:G.portals,portalT:G.portalT,idc:G.idc,hx:G.hx,hy:G.hy,portal:G.portal,gate:G.gate,rally:G.rally,
     ents:G.ents.concat(G.held).filter(e=>!e.dead).map(e=>{const o={};for(const k of SAVE_KEYS)o[k]=e[k];o.held=e.held;return o;})};
 }
 function deserialize(s){
@@ -777,7 +858,7 @@ function deserialize(s){
   const A=(C,a)=>C.from(a);
   Object.assign(G,{t:A(Uint8Array,s.t),room:A(Uint8Array,s.room),mark:A(Uint8Array,s.mark),hp:A(Uint8Array,s.hp),gold:A(Int16Array,s.gold),seen:A(Uint8Array,s.seen),loot:A(Int16Array,s.loot),
     money:s.money,heartHP:s.heartHP,heartMax:s.heartMax,time:s.time,nextWave:s.nextWave,wave:s.wave,spawnQ:s.spawnQ||[],research:s.research,
-    payT:s.payT,pown:A(Uint8Array,s.pown),pool:s.pool,portals:s.portals,portalT:s.portalT,idc:s.idc,hx:s.hx,hy:s.hy,portal:s.portal,gate:s.gate,rally:s.rally,
+    cpu:s.cpu||G.cpu,payT:s.payT,pown:A(Uint8Array,s.pown),pool:s.pool,portals:s.portals,portalT:s.portalT,idc:s.idc,hx:s.hx,hy:s.hy,portal:s.portal,gate:s.gate,rally:s.rally,
     ents:[],held:[],fx:[],res:new Map(),msgCd:{},over:null});
   for(const o of s.ents){const e=spawn(o.kind,0,0);G.ents.pop();Object.assign(e,o);
     e.state=e.side===2?'neutral':e.guard?'guard':e.side===1?'march':'think';e.path=[];
@@ -785,6 +866,7 @@ function deserialize(s){
   recount();G.fogDirty=true;
   document.getElementById('log').innerHTML='';
   msg('Saved game loaded.');
+  syncCpu();
 }
 let store=null,storeReady=false;
 async function initStore(){
@@ -881,6 +963,10 @@ function drawShroudTile(x,y,now){
   else if(t===GEM){ctx.globalAlpha=.7;const c=['#56d6ea','#c27cf5'];for(let k=0;k<2;k++){const gx=px+s*(.3+k*.35),gy=py+s*(.35+hash(x,y,k)*.3),r=s*.14;ctx.fillStyle=c[k];ctx.beginPath();ctx.moveTo(gx,gy-r);ctx.lineTo(gx+r*.7,gy);ctx.lineTo(gx,gy+r);ctx.lineTo(gx-r*.7,gy);ctx.fill();}ctx.globalAlpha=1;}
   if(G.mark[i]&&diggable(i))drawMark(px,py,s);
 }
+function drawChicken(x,y,now){
+  const s=TS,px=x*s,py=y*s,ph=now*(.6+hash(x,y,40))+hash(x,y,41)*9,chx=px+s*(.5+.28*Math.sin(ph)),chy=py+s*(.5+.22*Math.cos(ph*1.3));
+  if(!spr('props.hatchery-chicken',chx-s*.22,chy-s*.24,s*.44,s*.44,Math.cos(ph)<0)){circ(chx,chy,s*.09,'#f2ece0');circ(chx+s*.06,chy-s*.04,s*.03,'#d23b2b');}
+}
 function drawRoom(i,r,px,py,s,now,x,y){
   const R=ROOMS[r];
   if(r===TREAS){rr(px,py,s,s,'rgba(227,178,60,.10)');const f=Math.max(0,Math.min(1,(G.money-HEART_CAP)/(TREAS_CAP*G.rc[TREAS])));
@@ -889,8 +975,7 @@ function drawRoom(i,r,px,py,s,now,x,y){
     ctx.fillStyle='#140e0b';ctx.beginPath();ctx.ellipse(px+s/2,py+s*.55,s*.22,s*.13,0,0,Math.PI*2);ctx.fill();}}
   else if(r===HATCH){rr(px,py,s,s,'rgba(180,150,50,.13)');ctx.strokeStyle='rgba(216,176,74,.35)';ctx.lineWidth=1;ctx.beginPath();
     for(let k=0;k<4;k++){const a=hash(x,y,k+30)*Math.PI;const cx=px+s*(.2+.6*hash(x,y,k+31)),cy=py+s*(.2+.6*hash(x,y,k+32));ctx.moveTo(cx-Math.cos(a)*s*.12,cy-Math.sin(a)*s*.12);ctx.lineTo(cx+Math.cos(a)*s*.12,cy+Math.sin(a)*s*.12);}ctx.stroke();
-    const ph=now*(.6+hash(x,y,40))+hash(x,y,41)*9,chx=px+s*(.5+.28*Math.sin(ph)),chy=py+s*(.5+.22*Math.cos(ph*1.3));
-    if(!spr('props.hatchery-chicken',chx-s*.22,chy-s*.24,s*.44,s*.44,Math.cos(ph)<0)){circ(px+s*(.5+.28*Math.sin(ph)),py+s*(.5+.22*Math.cos(ph*1.3)),s*.09,'#f2ece0');circ(px+s*(.5+.28*Math.sin(ph))+s*.06,py+s*(.5+.22*Math.cos(ph*1.3))-s*.04,s*.03,'#d23b2b');}}
+  }
   else if(r===TRAIN){rr(px,py,s,s,'rgba(190,60,40,.12)');if((x+y)%2===0&&!spr('props.training-dummy',px+s*.06,py+s*.02,s*.88,s*.88)){rr(px+s*.45,py+s*.2,s*.1,s*.62,'#6b4a2e');rr(px+s*.25,py+s*.35,s*.5,s*.08,'#6b4a2e');circ(px+s*.5,py+s*.2,s*.09,'#8a6a46');}}
   else if(r===LIB){rr(px,py,s,s,'rgba(70,110,180,.14)');if(!spr('props.library-shelf',px+s*.04,py+s*.04,s*.92,s*.92)){rr(px+s*.15,py+s*.18,s*.7,s*.5,'#2a1c14');const bc=['#7a2b2b','#2d5a7a','#6b5a2a','#3d6b3a','#5a3a7a'];
     for(let k=0;k<5;k++)rr(px+s*(.18+k*.13),py+s*(.22+hash(x,y,k)*.06),s*.1,s*.42,bc[(k+x+y)%5]);}}
@@ -966,14 +1051,19 @@ function makeCloud(){
     for(const ox of[-w,0,w])for(const oy of[-h,0,h]){const cx=x+ox,cy=y+oy;if(cx<-r||cy<-r||cx>w+r||cy>h+r)continue;const g=cctx.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,'rgba('+col+','+a+')');g.addColorStop(1,'rgba('+col+',0)');cctx.fillStyle=g;cctx.fillRect(cx-r,cy-r,r*2,r*2);}
   }
 }
-function drawFog(now){
+function drawFog(now,sig,x0,x1,y0,y1){
   if(G.fogDirty)rebuildFog();
-  const w=layer.width,h=layer.height;
+  const w=layer.width,h=layer.height,key=sig+'|'+cam.x+'|'+cam.y+'|'+TS+'|'+w+'|'+Object.keys(IMG).length;
+  if(key!==fogKey||now-fogT>.1){fogKey=key;fogT=now;
   lctx.globalCompositeOperation='source-over';lctx.clearRect(0,0,w,h);
   lctx.imageSmoothingEnabled=true;lctx.drawImage(fogC,0,0,W,H,cam.x*DPR,cam.y*DPR,W*TS*DPR,H*TS*DPR);
   lctx.globalCompositeOperation='source-in';
   const md=(a,m)=>((a%m)+m)%m,ox=md(cam.x*DPR+now*BASE*DPR*.15,w),oy=md(cam.y*DPR,h);
   for(const a of[ox-w,ox])for(const b of[oy-h,oy])lctx.drawImage(cloud,a,b);
+  // gold, gems and dig marks show through the clouds
+  lctx.globalCompositeOperation='source-over';ctx=lctx;setWorld();
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!G.seen[ix(x,y)])drawShroudTile(x,y,now);
+  ctx=mainCtx;lctx.setTransform(1,0,0,1,0,0);}
   ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(layer,0,0);setWorld();
 }
 function dragRect(){if(!drag)return null;return{x0:Math.min(drag.x0,drag.x1),y0:Math.min(drag.y0,drag.y1),x1:Math.max(drag.x0,drag.x1),y1:Math.max(drag.y0,drag.y1)};}
@@ -992,7 +1082,17 @@ function draw(){
   setWorld();
   rr(0,0,W*s,H*s,'#070505');
   const x0=Math.max(0,Math.floor(-cam.x/s)),x1=Math.min(W-1,Math.floor((SW-cam.x)/s)),y0=Math.max(0,Math.floor(-cam.y/s)),y1=Math.min(H-1,Math.floor((SH-cam.y)/s));
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)drawTile(x,y,now);
+  // Terrain is cached in `terr` and only redrawn when a visible tile, the view or the treasury fill changes.
+  let sig=0;
+  for(let y=Math.max(0,y0-1);y<=Math.min(H-1,y1+1);y++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x1+1);x++){const i=ix(x,y);
+    sig=(Math.imul(sig,31)+(G.t[i]|G.room[i]<<4|G.mark[i]<<7|G.seen[i]<<8|(G.loot[i]>0)<<9|(G.t[i]===WALL&&G.hp[i]<WALL_HP)<<10))|0;}
+  const tf=G.rc[TREAS]?Math.round(10*Math.max(0,Math.min(1,(G.money-HEART_CAP)/(TREAS_CAP*G.rc[TREAS])))):0;
+  const key=sig+'|'+cam.x+'|'+cam.y+'|'+TS+'|'+cv.width+'|'+tf+'|'+Object.keys(IMG).length;
+  if(key!==terrKey){terrKey=key;if(terr.width!==cv.width||terr.height!==cv.height){terr.width=cv.width;terr.height=cv.height;}
+    const tc=terr.getContext('2d');tc.setTransform(1,0,0,1,0,0);tc.clearRect(0,0,terr.width,terr.height);
+    ctx=tc;setWorld();for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const t=G.t[ix(x,y)];if(t!==LAVA)drawTile(x,y,0);}ctx=mainCtx;}
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(terr,0,0);setWorld();
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=ix(x,y);if(!G.seen[i])continue;if(G.t[i]===LAVA)drawTile(x,y,now);else if(G.room[i]===HATCH)drawChicken(x,y,now);}
   drawSpecials(now);
   const es=G.ents.filter(e=>!e.held&&(e.side===0||G.seen[ti(e)])).sort((a,b)=>a.y-b.y);
   for(const e of es)drawEnt(e,now,e.x,e.y);
@@ -1005,8 +1105,7 @@ function draw(){
       for(let k=1;k<=8;k++){by=f.y*s*k/8;bx=f.x*s+(k<8?(hash(k,f.seed)-.5)*s*1.4:0);ctx.lineTo(bx,by);}ctx.stroke();circ(f.x*s,f.y*s,s*1.6*(1-p),'rgba(200,220,255,.25)');ctx.globalAlpha=1;}
     else if(f.type==='heal'){ctx.strokeStyle='#7fe08a';ctx.globalAlpha=1-p;ctx.lineWidth=3;ctx.beginPath();ctx.arc(f.x*s,f.y*s,s*2.5*p,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
   }
-  drawFog(now);
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!G.seen[ix(x,y)])drawShroudTile(x,y,now);
+  drawFog(now,sig,x0,x1,y0,y1);
   if(G.rally&&G.time<G.rally.until){const x=(tx(G.rally.i)+.5)*s,y=(ty(G.rally.i)+.5)*s;rr(x-1,y-s*.7,2,s*.7,'#c9b28a');ctx.fillStyle='#b3261e';ctx.beginPath();ctx.moveTo(x+1,y-s*.7);ctx.lineTo(x+s*.45,y-s*.55);ctx.lineTo(x+1,y-s*.4);ctx.fill();}
   const R=dragRect();
   if(R){
@@ -1045,6 +1144,92 @@ function dropHeld(i){
   d.after=k&&r===TRAIN&&G.money>0?['train',8]:k&&r===LIB?['study',8]:k&&r===LAIR?['sleep',0]:k&&r===HATCH?['eat',2.5]:null;
   d.boost=d.after?CFG.hand.workBoost:1;d.state='stun';d.timer=CFG.hand.dropStun;
   fx({type:'ring',x:d.x,y:d.y,dur:.4,col:'#eadcc6'});fx({type:'dust',x:d.x,y:d.y+.3,dur:.4,col:'#8a6446'});
+}
+function pickUp(e){
+  if(G.held.length>=CFG.hand.capacity){msg('Your hand is full ('+CFG.hand.capacity+'). Drop a creature first.','handfull','bad');return false;}
+  release(e);e.held=true;e.path=[];e.target=null;e.boost=1;G.held.push(e);return true;
+}
+function activity(e){
+  if(e.held)return 'hand';const st=e.state==='walk'?e.next:e.state;
+  if(st==='fight')return 'fighting';
+  return['dig','claim','reinforce','deposit','train','study','eat','sleep'].includes(st)?'working':'idle';
+}
+/* ---------- computer assistant ---------- */
+// Modelled on Dungeon Keeper 1's Computer Assistant: Aggressive, Defensive, Construction only, Move only.
+const CPU_DOES={aggressive:{build:1,move:1,attack:1},defensive:{build:1,move:1,guard:1},construction:{build:1},move:{move:1}};
+function cpuTick(dt){
+  const c=G.cpu;if(!c||!c.on)return;if((c.t-=dt)>0)return;c.t=CFG.assistant.interval;
+  const d=CPU_DOES[c.mode]||{};
+  if(d.build)cpuBuild();
+  if(d.move)cpuMove();
+  if(d.attack||d.guard)cpuSpells(!!d.attack);
+}
+const marksCount=()=>{let n=0;for(let i=0;i<N;i++)n+=G.mark[i];return n;};
+function cpuMark(list){let n=marksCount();for(const i of list){if(n>=CFG.assistant.maxMarks)break;if(diggable(i)&&G.t[i]!==WALL&&!G.mark[i]){G.mark[i]=1;n++;}}}
+function cpuBuild(){
+  const A=CFG.assistant;
+  // 1. tunnel to the nearest portal until one is ours
+  if(!anyPortal()){for(const P of G.portals.slice().sort((a,b)=>Math.hypot(tx(a)-G.hx,ty(a)-G.hy)-Math.hypot(tx(b)-G.hx,ty(b)-G.hy))){
+    const p=bfs(P,i=>G.t[i]===CLAIM,1,i=>walk(i)||diggable(i)&&G.t[i]!==GEM);if(p){cpuMark(p);break;}}}
+  // 2. tunnel to the nearest gold seam (gold glints through the clouds, so the player knows where it is)
+  if(G.money<cap()*.9&&marksCount()<CFG.assistant.maxMarks/2){
+    const p=bfs(ix(G.hx+2,G.hy),i=>(G.t[i]===GOLD||G.t[i]===GEM&&G.money<cap()*.5)&&!G.mark[i],1,i=>walk(i)||diggable(i)&&G.t[i]!==WALL);
+    if(p)cpuMark(p);}
+  // 3. rooms, in the order a keeper needs them
+  const cre=creatures().length+G.held.filter(e=>e.kind!=='imp').length;
+  const want=[[LAIR,Math.max(4,cre+2)],[HATCH,4],[TREAS,G.money>cap()*.75?G.rc[TREAS]+4:Math.max(G.rc[TREAS],2)],[TRAIN,cre>=3?9:0],[LIB,cre>=3?9:0],[HATCH,cre>=5?9:4],[LAIR,cre>=5?Math.max(9,cre+2):0]];
+  let short=false;
+  for(const[r,n]of want){
+    if(G.rc[r]>=n)continue;const cost=ROOMS[r].cost;
+    let need=n-G.rc[r];if(G.money-A.reserveGold<cost*need)need=Math.floor((G.money-A.reserveGold)/cost);if(need<=0)break;
+    const seeds=[];for(let i=0;i<N;i++)if(G.room[i]===r)seeds.push(i);
+    const free=[];const seen=new Uint8Array(N),q=seeds.length?seeds:[ix(G.hx+2,G.hy)];for(const i of q)seen[i]=1;
+    for(let h=0;h<q.length&&free.length<need;h++){const c=q[h];if(G.t[c]===CLAIM&&!G.room[c]&&!adjHeart(c))free.push(c);
+      for(const[dx,dy]of N4){const a=tx(c)+dx,b=ty(c)+dy;if(!inb(a,b))continue;const k=ix(a,b);if(!seen[k]&&G.t[k]===CLAIM){seen[k]=1;q.push(k);}}}
+    for(const i of free)build(i,r);
+    if(free.length)msg('Assistant: built '+free.length+' '+ROOMS[r].n+' tile'+(free.length>1?'s':'')+'.','cpu-b'+r);
+    recount();if(free.length<need){short=true;break;}
+  }
+  // 4. out of floor space: dig out a 3x3 block of earth next to your territory, close to the Heart
+  if(short&&marksCount()<A.maxMarks/2){
+    const p=bfs(ix(G.hx+2,G.hy),i=>G.t[i]===CLAIM&&nb(i,j=>G.t[j]===EARTH||G.t[j]===WALL)>=0,4,i=>G.t[i]===CLAIM);
+    if(p){const end=p.length?p[p.length-1]:ix(G.hx+2,G.hy),e=nb(end,j=>G.t[j]===EARTH||G.t[j]===WALL);const blk=[];
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=tx(e)+(tx(e)-tx(end))+dx,y=ty(e)+(ty(e)-ty(end))+dy;if(x>0&&y>0&&x<W-1&&y<H-1)blk.push(ix(x,y));}
+      blk.push(e);for(const i of blk)if(G.t[i]===WALL&&!G.mark[i])G.mark[i]=1;cpuMark(blk);}
+  }
+  // 5. enough imps for the size of the dungeon
+  let claimed=0;for(let i=0;i<N;i++)claimed+=G.t[i]===CLAIM;
+  const imps=G.ents.filter(e=>e.kind==='imp'&&e.side===0).length+G.held.filter(e=>e.kind==='imp').length;
+  if(imps<Math.min(A.maxImps,CFG.imp.startCount+Math.floor(claimed/A.impsPerClaimed))&&G.money>impCost()+A.reserveGold){
+    const r=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM&&adjHeart(i))r.push(i);if(r.length){cast('imp',r[rand(r.length)]);msg('Assistant: summoned an imp.','cpu-imp');}}
+}
+function cpuMove(){
+  const heroes=G.ents.filter(e=>e.side===1&&!e.dead&&!e.guard&&G.seen[ti(e)]);
+  if(heroes.length){
+    const tgt=heroes.reduce((a,b)=>Math.hypot(a.x-G.hx,a.y-G.hy)<Math.hypot(b.x-G.hx,b.y-G.hy)?a:b);
+    let drop=-1,bd=9;
+    for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const x=Math.floor(tgt.x)+dx,y=Math.floor(tgt.y)+dy;if(!inb(x,y))continue;const i=ix(x,y),d=Math.hypot(x+.5-tgt.x,y+.5-tgt.y);
+      if(G.t[i]===CLAIM&&d>=1.5&&d<bd&&clearShot({x:x+.5,y:y+.5},tgt)){bd=d;drop=i;}}
+    if(drop>=0){let n=0;
+      for(const e of creatures().filter(e=>activity(e)!=='fighting'&&e.hp>e.maxhp*.6&&Math.hypot(e.x-tgt.x,e.y-tgt.y)>8).sort((a,b)=>b.lvl-a.lvl)){
+        if(n>=3||!pickUp(e))break;dropHeld(drop);n++;}
+      if(n)msg('Assistant: dropped '+n+' creature'+(n>1?'s':'')+' on the invaders.','cpu-mv');}
+    return;
+  }
+  // in peace time, put one idle creature to work in the Training Room
+  if(G.rc[TRAIN]&&G.money>CFG.assistant.reserveGold){const e=creatures().find(e=>activity(e)==='idle'&&e.lvl<10&&e.hunger<80);
+    if(e){const t=[];for(let i=0;i<N;i++)if(G.room[i]===TRAIN)t.push(i);if(t.length&&pickUp(e))dropHeld(t[rand(t.length)]);}}
+}
+function cpuSpells(aggressive){
+  const A=CFG.assistant,heroes=G.ents.filter(e=>e.side===1&&!e.dead&&G.seen[ti(e)]&&(aggressive?!e.guard:Math.hypot(e.x-G.hx,e.y-G.hy)<8));
+  if(heroes.length&&G.research>=SPELLS.bolt.req&&G.money>SPELLS.bolt.cost+A.reserveGold){
+    let best=null,bn=0;for(const h of heroes){const n=heroes.filter(o=>Math.hypot(o.x-h.x,o.y-h.y)<SPELLS.bolt.radius).length;if(n>bn){bn=n;best=h;}}
+    if(best)cast('bolt',ti(best),best.x,best.y);
+  }
+  if(aggressive&&heroes.length&&G.research>=SPELLS.rally.req&&G.money>SPELLS.rally.cost+A.reserveGold&&!(G.rally&&G.time<G.rally.until)){
+    const h=heroes[0],p=bfs(ti(h),walk,1,walk,6);if(p&&p.length)cast('rally',p[p.length-1],h.x,h.y);}
+  if(!aggressive&&G.research>=SPELLS.heal.req&&G.money>SPELLS.heal.cost+A.reserveGold){
+    const hurt=creatures().find(e=>activity(e)==='fighting'&&e.hp<e.maxhp*.4);if(hurt)cast('heal',ti(hurt),hurt.x,hurt.y);}
 }
 function entAt(fx,fy){let best=null,bd=.42;for(const e of G.ents){if(e.dead||e.held||e.side!==0)continue;const d=Math.hypot(e.x-fx,e.y-fy);if(d<bd){bd=d;best=e;}}return best;}
 function slapAt(fx,fy){const e=entAt(fx,fy);if(!e)return;e.slap=10;e.hp-=4;fx({type:'text',x:e.x,y:e.y-.3,dur:.6,txt:'Slap!',col:'#ffd2a8'});if(e.hp<=0){kill(e);return;}if(e.kind!=='imp'&&e.state!=='fight'){release(e);e.state='think';}}
@@ -1085,7 +1270,7 @@ cv.addEventListener('pointerdown',ev=>{
   if(tool==='slap'){slapAt(p.fx,p.fy);return;}
   if(tool==='hand'){
     const e=entAt(p.fx,p.fy);
-    if(e){if(G.held.length>=CFG.hand.capacity){msg('Your hand is full ('+CFG.hand.capacity+'). Drop a creature first.','handfull','bad');return;}release(e);e.held=true;e.path=[];e.target=null;e.boost=1;G.held.push(e);return;}
+    if(e){pickUp(e);return;}
     if(G.held.length&&ownPortal(i)&&G.held[G.held.length-1].kind!=='imp'){const d=G.held.pop();d.dead=true;toPool(d);fx({type:'ring',x:p.x+.5,y:p.y+.5,dur:.6,col:'#c58cff'});msg('You dismissed your '+KINDS[d.kind].n+' through the portal.','dis'+d.id);return;}
     if(G.held.length&&(G.t[i]===CLAIM||ownPortal(i))){dropHeld(i);return;}
     if(G.held.length&&G.seen[i]){msg('You can only drop creatures on your own territory.','dropbad','bad');return;}
@@ -1180,8 +1365,47 @@ function ui(){
   for(const[k,a]of Object.entries(ATTRACT)){const ok=a.ok();ph+='<li class="'+(ok?'ok':'')+'"><i class="dot" style="background:'+KINDS[k].col+'"></i><b>'+KINDS[k].n+'</b><span class="n">'+G.pool[k]+' left</span><span class="need">'+(ok?'✓ ':'Needs ')+a.need+'</span></li>';}
   ph+='<li><span class="need">Creatures: '+n+' / '+PORTAL_LIMIT+' · free beds: '+Math.max(0,G.rc[LAIR]-n)+(anyPortal()?' · next arrival in '+fmtT(G.portalT):'')+'</span></li>';
   const pl=$('pool');if(pl.innerHTML!==ph)pl.innerHTML=ph;
+  // Info tab gauges, as in Dungeon Keeper's information panel
+  $('gPay').style.width=(100*(1-G.payT/ECON.payInterval))+'%';$('gPayTxt').textContent=fmtT(G.payT)+' · wages '+due;$('gPayTxt').classList.toggle('bad',due>G.money);
+  const nextSp=Object.values(SPELLS).filter(s=>s.req>G.research).sort((a,b)=>a.req-b.req)[0];
+  $('gRes').style.width=(nextSp?100*G.research/nextSp.req:100)+'%';$('gResTxt').textContent=nextSp?Math.floor(G.research)+' / '+nextSp.req+' → '+nextSp.n:'all spells researched';
+  if(tab==='creatures'){
+    let gh='<span></span><span class="h">Idle</span><span class="h">Working</span><span class="h">Fighting</span>';
+    const mine=G.ents.filter(e=>!e.dead&&e.side===0);
+    for(const k of CR_ORDER()){const of=mine.filter(e=>e.kind===k&&!e.held);const held=G.held.filter(e=>e.kind===k).length;if(!of.length&&!held)continue;
+      const src=ASSETS['units.'+k],cnt=a=>of.filter(e=>activity(e)===a).length;
+      gh+='<button type="button" class="who" data-k="'+k+'" title="Pick up the most experienced '+KINDS[k].n+'">'+(src?'<img src="'+src+'" alt="">':'<i style="background:'+KINDS[k].col+'"></i>')+'<span>'+KINDS[k].n+(held?' <small>('+held+' in hand)</small>':'')+'</span></button>';
+      for(const a of['idle','working','fighting']){const n=cnt(a);gh+='<button type="button" class="num'+(a==='fighting'&&n?' f':'')+'" data-k="'+k+'" data-a="'+a+'"'+(n?'':' disabled')+'>'+n+'</button>';}}
+    if(gh.split('class="who"').length===1)gh+='<span class="h" style="grid-column:1/-1;text-align:left">No creatures yet.</span>';
+    const g=$('crGrid');if(g.innerHTML!==gh)g.innerHTML=gh;
+    const list=mine.concat().filter(e=>e.kind!=='imp').sort((a,b)=>CR_ORDER().indexOf(a.kind)-CR_ORDER().indexOf(b.kind)||b.lvl-a.lvl);
+    const lh=list.map(e=>'<li><button type="button" data-id="'+e.id+'" title="Look at this creature"><span class="nm">'+KINDS[e.kind].n+' <small>'+(e.held?'in your hand':STATE_EN[e.state==='walk'?e.next||'walk':e.state]||e.state)+'</small></span><span class="lv">'+e.lvl+'</span><span class="hp"><i style="width:'+Math.round(100*Math.max(0,e.hp/e.maxhp))+'%;background:'+(e.hp<e.maxhp*.35?'#e0483c':'#5fcf6a')+'"></i></span></button></li>').join('');
+    const l=$('crList');if(l.innerHTML!==lh)l.innerHTML=lh;
+  }
   const hd=$('held'),hh=G.held.length?'<span>In hand '+G.held.length+'/'+CFG.hand.capacity+' · next drop:</span>'+G.held.slice().reverse().map((e,n)=>'<button type="button" data-id="'+e.id+'" class="'+(n?'':'top')+'" title="Drop this one next"><i class="dot" style="background:'+KINDS[e.kind].col+'"></i>'+KINDS[e.kind].n+(e.lvl>1?' '+e.lvl:'')+'</button>').join(''):'';
   hd.hidden=!G.held.length;if(hd.innerHTML!==hh)hd.innerHTML=hh;
+}
+function syncCpu(){const c=G.cpu;const b=document.getElementById('bCpu');b.setAttribute('aria-pressed',String(c.on));b.title='Computer Assistant: '+(c.on?'on ('+c.mode+')':'off');
+  document.getElementById('cpuModes').hidden=!c.on;for(const m of document.querySelectorAll('#cpuSeg button'))m.setAttribute('aria-pressed',String(m.dataset.mode===c.mode));}
+let tab='info';
+function showTab(t){tab=t;for(const b of document.querySelectorAll('#tabs button'))b.setAttribute('aria-selected',String(b.dataset.tab===t));
+  for(const s of document.querySelectorAll('.tab'))s.hidden=s.id!=='tab-'+t;try{localStorage.setItem('underlord-tab',t);}catch(e){}if(G)ui();}
+const CR_ORDER=()=>['imp',...Object.keys(ATTRACT)];
+function crPick(kind,act,look){
+  const list=G.ents.filter(e=>!e.dead&&!e.held&&e.side===0&&e.kind===kind&&(!act||activity(e)===act)).sort((a,b)=>b.lvl-a.lvl||a.id-b.id);if(!list.length)return;
+  const key=kind+act;G.crCycle=G.crCycle||{};const k=act?(G.crCycle[key]=((G.crCycle[key]??-1)+1)%list.length):0,e=list[k];
+  if(look)centerOn(e.x-.5,e.y-.5);else if(pickUp(e))msg('You picked up your '+KINDS[kind].n+'.','pick'+e.id);
+  ui();
+}
+function drawMini(){
+  const m=document.getElementById('mini');const w=m.clientWidth;if(!w)return;const d=window.devicePixelRatio||1,h=Math.round(w*H/W);
+  if(m.width!==Math.round(w*d)){m.width=Math.round(w*d);m.height=Math.round(h*d);}
+  const c=m.getContext('2d'),s=m.width/W;c.setTransform(1,0,0,1,0,0);
+  const col={[ROCK]:'#121116',[EARTH]:'#4b3423',[GOLD]:'#d6a52a',[GEM]:'#56d6ea',[FLOOR]:'#2a211b',[CLAIM]:'#6a2620',[HEART]:'#ff4a3a',[PORTAL]:'#c24bd6',[GATE]:'#bcd2f0',[LAVA]:'#e0561b',[WALL]:'#6b5d55'};
+  for(let i=0;i<N;i++){const t=G.t[i];c.fillStyle=!G.seen[i]?(t===GOLD||t===GEM?'#5a4416':'#0c0a0f'):G.room[i]?ROOMS[G.room[i]].col:col[t];c.fillRect(tx(i)*s,ty(i)*s,Math.ceil(s),Math.ceil(s));}
+  for(const P of G.portals){c.fillStyle=G.pown[P]?'#ff6ad5':'#8a6ab0';c.fillRect((tx(P)-.25)*s,(ty(P)-.25)*s,s*1.5,s*1.5);}
+  for(const e of G.ents){if(e.dead||e.held||(e.side!==0&&!G.seen[ti(e)]))continue;c.fillStyle=e.side===1?'#e6eef9':e.side===2?'#9a928a':e.kind==='imp'?'#ffb070':'#ffe2a0';c.fillRect(e.x*s-s*.4,e.y*s-s*.4,s*.8,s*.8);}
+  c.strokeStyle='rgba(255,240,220,.85)';c.lineWidth=Math.max(1,d);c.strokeRect(-cam.x/TS*s,-cam.y/TS*s,SW/TS*s,SH/TS*s);
 }
 function syncPause(){document.getElementById('bPause').textContent=paused?'Resume':'Pause';}
 document.getElementById('bPause').onclick=()=>{paused=!paused;syncPause();};
@@ -1208,6 +1432,19 @@ for(const[label,fn]of CHEATS){const b=document.createElement('button');b.type='b
   b.onclick=()=>{if(!running||G.over)return;const r=fn();msg('Cheat: '+r+'.','cheat'+G.time+label,'good');};document.getElementById('cheatList').appendChild(b);}
 function toggleCheats(open){const c=document.getElementById('cheats'),b=document.getElementById('bCheat');open=open??c.hidden;c.hidden=!open;b.setAttribute('aria-expanded',String(open));}
 document.getElementById('bCheat').onclick=()=>toggleCheats();
+document.getElementById('tabs').onclick=ev=>{const b=ev.target.closest('button[data-tab]');if(b)showTab(b.dataset.tab);};
+document.getElementById('bCpu').onclick=()=>{G.cpu.on=!G.cpu.on;G.cpu.t=0;syncCpu();msg('Computer Assistant '+(G.cpu.on?'on ('+G.cpu.mode+')':'off')+'.','cpu'+G.time);};
+document.getElementById('cpuSeg').onclick=ev=>{const b=ev.target.closest('button[data-mode]');if(!b)return;G.cpu.mode=b.dataset.mode;syncCpu();};
+const crg=document.getElementById('crGrid');
+crg.onclick=ev=>{const b=ev.target.closest('button[data-k]');if(!b||!running)return;crPick(b.dataset.k,b.dataset.a||'',false);};
+crg.oncontextmenu=ev=>{const b=ev.target.closest('button[data-k]');if(!b)return;ev.preventDefault();crPick(b.dataset.k,b.dataset.a||'',true);};
+document.getElementById('crList').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const e=G.ents.find(o=>o.id===+b.dataset.id);if(e&&!e.held)centerOn(e.x-.5,e.y-.5);};
+{const m=document.getElementById('mini');let down=false;
+  const go=ev=>{const r=m.getBoundingClientRect();centerOn((ev.clientX-r.left)/r.width*W-.5,(ev.clientY-r.top)/r.height*H-.5);};
+  m.addEventListener('pointerdown',ev=>{down=true;m.setPointerCapture(ev.pointerId);go(ev);});
+  m.addEventListener('pointermove',ev=>{if(down)go(ev);});
+  m.addEventListener('pointerup',()=>{down=false;});m.addEventListener('pointercancel',()=>{down=false;});}
+try{const t=localStorage.getItem('underlord-tab');if(t)tab=t;}catch(e){}
 document.getElementById('held').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const k=G.held.findIndex(e=>e.id===+b.dataset.id);if(k>=0){G.held.push(G.held.splice(k,1)[0]);ui();}};
 document.getElementById('bSave').onclick=()=>{if(running)saveGame(false);};
 document.getElementById('bLoad').onclick=()=>loadGame();
@@ -1241,10 +1478,10 @@ function frame(now){
   if(running&&!paused){for(let k=0;k<speed;k++)update(dt);if((autoT-=dt)<=0){autoT=120;saveGame(true);}}
   if(keys.size){const v=700*dt;if(keys.has('arrowleft')||keys.has('a'))cam.x+=v;if(keys.has('arrowright')||keys.has('d'))cam.x-=v;if(keys.has('arrowup')||keys.has('w'))cam.y+=v;if(keys.has('arrowdown')||keys.has('s'))cam.y-=v;clampCam();}
   draw();
-  if((uiT-=dt)<=0){uiT=.2;ui();}
+  if((uiT-=dt)<=0){uiT=.2;ui();drawMini();}
   requestAnimationFrame(frame);
 }
-newGame();resize();requestAnimationFrame(frame);
+newGame();resize();requestAnimationFrame(frame);showTab(tab);syncCpu();
 fetchConfig().then(c=>{if(!c)return;applyConfig(c);buildTools();if(!running)newGame();});
 refreshContinue();initStore();
 })();

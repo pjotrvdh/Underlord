@@ -3,7 +3,8 @@
 // opening (dig to the nearest portal, build rooms) and prints a status line
 // every 100 simulated seconds. Ends with a save/load round trip.
 //
-// Usage: node tools/sim.cjs [seconds=700]
+// Usage: node tools/sim.cjs [seconds=700] [--cpu[=mode]]
+//   --cpu  skip the scripted opening and let the Computer Assistant play (default mode: defensive)
 const fs = require('fs');
 const path = require('path');
 
@@ -35,7 +36,7 @@ const mk = () => {
   });
 };
 Object.assign(globalThis, {
-  document: { getElementById: id => cfg[id] !== undefined ? { textContent: cfg[id] } : mk(), createElement: () => mk() },
+  document: { querySelectorAll: () => [], getElementById: id => cfg[id] !== undefined ? { textContent: cfg[id] } : mk(), createElement: () => mk() },
   Image: class { set src(v) {} },
   addEventListener: noop, devicePixelRatio: 1, requestAnimationFrame: noop,
   performance: { now: () => Date.now() },
@@ -66,12 +67,14 @@ const portal = g.portals.slice().sort((a, b) =>
   for (let c = portal; c >= 0; c = pr[c]) if (g.t[c] === 1 || g.t[c] === 2) g.mark[c] = 1;
 }
 
-const secs = +(process.argv[2] || 700);
+const args = process.argv.slice(2), cpuArg = args.find(a => a.startsWith('--cpu'));
+const secs = +(args.find(a => /^\d+$/.test(a)) || 700);
 let built = false;
+if (cpuArg) { g.cpu.on = true; g.cpu.mode = cpuArg.split('=')[1] || 'defensive'; g.mark.fill(0); built = true; }
 for (let t = 0; t <= secs; t += 0.05) {
   T.update(0.05);
   // Like a player: every 30 s mark every explored gold or gem seam next to open ground.
-  if (Math.abs(t % 30) < 0.05) for (let i = 0; i < N; i++)
+  if (!cpuArg && Math.abs(t % 30) < 0.05) for (let i = 0; i < N; i++)
     if ((g.t[i] === 2 || g.t[i] === 3) && g.seen[i] && [1, -1, W, -W].some(o => [4, 5].includes(g.t[i + o]))) g.mark[i] = 1;
   if (!built && t > 120) {
     // Build 9-tile rooms so every creature type can be attracted.

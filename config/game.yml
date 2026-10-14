@@ -39,5 +39,12 @@ hand:
   dropStun: 1.0        # seconds a dropped creature is dazed (as in Dungeon Keeper 2)
   workBoost: 1.1       # work-speed bonus for a creature dropped straight into a room
 
+assistant:             # the Computer Assistant ("C" button), modelled on Dungeon Keeper 1
+  interval: 1.5         # seconds between decisions
+  maxMarks: 24          # it won't mark more blocks for digging than this at once
+  reserveGold: 300      # gold it keeps aside when building or casting
+  maxImps: 12
+  impsPerClaimed: 35    # one extra imp per this many claimed tiles
+
 walls:
   hp: 8                 # hits to dig through a reinforced wall

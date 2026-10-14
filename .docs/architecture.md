@@ -17,7 +17,8 @@
 | drawing | `drawTile`, `drawRoom`, `drawSpecials` (Heart, portals, Gate), `drawEnt`, `makeCloud`, `drawFog`, `drawShroudTile`, `draw` |
 | camera | `setWorld`, `clampCam`, `zoomAt`, `centerOn` (these sit between the drawing helpers) |
 | input | `affects`, `toolValid`, `entAt`, `slapAt`, `build`, `sell`, `applyRect`, `cast`, pointer, wheel and key handlers, `updateTip` |
-| interface | `CHEATS` (cheats panel), `toggleCheats`, `TOOLDEFS` (builds the toolbox buttons), `setTool`, `ui()` (stats, info box, Portal panel), `setSpeed`, `resize`, `frame` |
+| assistant | `CPU_DOES`, `cpuTick`, `cpuBuild`, `cpuMove`, `cpuSpells`, `cpuMark`, plus the helpers `pickUp` and `activity` (idle, working, fighting or hand) |
+| interface | `CHEATS` (cheats panel), `toggleCheats`, `showTab`, `syncCpu`, `crPick`, `drawMini`, `TOOLDEFS` (builds the toolbox buttons), `setTool`, `ui()` (stats, info box, Portal panel), `setSpeed`, `resize`, `frame` |
 
 ## Config and assets
 
@@ -62,6 +63,14 @@ There is one object shape for every unit (see `spawn`).
 Units are removed by setting `dead = true`; `update()` filters them out. Held units are left out of `tick` and `draw`.
 
 ## Rendering
+
+**Performance:** without caching, drawing the whole map each frame ran at 1–2 fps in a browser without GPU acceleration. There are now two caches:
+
+- **Terrain cache (`terr`):** visible tiles are drawn into an offscreen canvas. It is only redrawn when its key changes. The key combines a cheap hash over the visible tiles (`t`, `room`, `mark`, `seen`, `loot`, wall damage), the camera, the zoom, the treasury fill bucket and the number of loaded assets. Lava and the hatchery chickens animate, so they are drawn every frame on top.
+- **Fog cache (`layer`):** the clouds plus the shroud overlay (gold, gems and marks in the clouds). It is redrawn when the same key changes, and otherwise 10 times per second so the clouds keep drifting.
+
+The drawing helpers all use the module-level `ctx`. During a cache render it is temporarily pointed at the offscreen context; `mainCtx` is the real canvas.
+
 
 - The canvas fills `.stage`. Drawing happens in world units after calling `setWorld()`, which applies DPR scaling plus the `cam` offset. Only tiles inside the visible range are drawn.
 - **Frame order:**

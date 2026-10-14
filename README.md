@@ -36,6 +36,8 @@ Then open http://localhost:8765/underlord.html.
 - **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
 - **Hand:** left-click a creature to pick it up (you can hold up to 8), then left-click your territory to drop it. A creature dropped into a Training Room, Library, Lair or Hatchery starts working there right away, with a small bonus. A dropped creature is dazed for a moment. If you drop one on your own portal, you dismiss it. Right-click slaps a creature, and slapped imps work faster.
 - **Spells:** Create Imp, Lightning, Heal and Call to Arms. You unlock the last three through research in the Library.
+- **Control panel:** it is laid out like Dungeon Keeper's, with a minimap at the top (click it to jump there), then Info, Rooms, Spells and Creatures tabs. The Creatures tab shows, for each type, how many are idle, working and fighting. Click a number to pick one of them up, or right-click it to look at it.
+- **Computer Assistant:** the **C** button on the minimap lets the computer play for you, in one of four modes: Aggressive, Defensive, Construction only or Move only.
 - **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
 
 ### Controls
@@ -55,6 +57,7 @@ Then open http://localhost:8765/underlord.html.
 
 ```bash
 node tools/sim.cjs 700
+node tools/sim.cjs 1400 --cpu=aggressive
 ```
 
-This runs the real game logic headless for 700 simulated seconds. It plays a scripted opening, prints status lines and checks that a save/load round trip works. See [`AGENTS.md`](AGENTS.md) for how to work on the project, and [`.docs/`](.docs) for the game design and the code architecture.
+This runs the real game logic headless for 700 simulated seconds. It plays a scripted opening (or, with `--cpu`, lets the Computer Assistant play), prints status lines and checks that a save/load round trip works. See [`AGENTS.md`](AGENTS.md) for how to work on the project, and [`.docs/`](.docs) for the game design and the code architecture.
