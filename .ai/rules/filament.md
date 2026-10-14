@@ -6,7 +6,7 @@ paths:
 # Filament
 
 ## Panel conventions
-The panel follows the SWIS project wherermeorders: the same plugins and `AdminPanelProvider` settings, Lucide icons and the `App\Enums\NavigationGroup` enum. Resources extend `App\Filament\Resources\Resource`, which takes labels from `lang/en/resource.php`. Edit pages redirect to the index after saving.
+The panel is configured in `AdminPanelProvider`: SPA mode, Gravatar avatars, Lucide icons for actions and navigation, the `App\Enums\NavigationGroup` enum, and the plugins for the environment indicator, developer logins, impersonation, light switch and backgrounds. Resources extend `App\Filament\Resources\Resource`, which takes labels from `lang/en/resource.php`. Edit pages redirect to the index after saving.
 
 ## Forms
 Build forms with `App\Filament\Schemas\FormLayout`: a wide main section, and an aside with the fixed facts plus the updated at/by timestamps. Wrap every game-data field in `DefaultValue::on(...)`, so it shows its config default and is flagged when changed.

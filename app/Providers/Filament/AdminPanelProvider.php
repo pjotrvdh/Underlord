@@ -39,9 +39,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 
-/**
- * Panel setup follows the SWIS conventions used in wherermeorders.
- */
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel

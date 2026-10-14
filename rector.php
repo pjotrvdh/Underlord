@@ -6,7 +6,6 @@ use Rector\Config\RectorConfig;
 use RectorLaravel\Rector\Class_\AddHasFactoryToModelsRector;
 use RectorLaravel\Set\LaravelSetList;
 
-// Same setup as the SWIS project wherermeorders.
 return RectorConfig::configure()
     ->withComposerBased(laravel: true)
     ->withPaths([

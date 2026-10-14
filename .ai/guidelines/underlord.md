@@ -19,7 +19,7 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 
 ## Checks
 
-These are the same checks CI runs (`.github/workflows`, modelled on wherermeorders):
+These are the same checks CI runs (`.github/workflows`):
 
 - `ddev composer test`: the test suite, on in-memory SQLite.
 - `ddev composer analyse`: PHPStan/Larastan at the max level.

@@ -11,7 +11,7 @@ use Filament\Schemas\Components\Section;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * The SWIS form layout (as in wherermeorders' OccasionForm): the fields in a wide main section,
+ * The admin form layout: the fields in a wide main section,
  * and a narrow aside with the record's fixed facts and when (and by whom) it was last changed.
  */
 class FormLayout
