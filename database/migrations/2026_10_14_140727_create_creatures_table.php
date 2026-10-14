@@ -27,7 +27,6 @@ return new class extends Migration
             $table->unsignedInteger('bounty')->default(0);
             $table->decimal('dig', 5, 2)->nullable();
             $table->boolean('big')->default(false);
-            $table->string('color', 9);
             // Game data comes from config/underlord; only changes made in the admin panel are tracked.
             $table->timestamp('updated_at')->nullable();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();

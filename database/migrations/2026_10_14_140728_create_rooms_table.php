@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('key')->primary(); // the handle used in config/underlord and by the game
             $table->string('name');
             $table->unsignedInteger('cost');
-            $table->string('color', 9);
             $table->string('tip');
             // Game data comes from config/underlord; only changes made in the admin panel are tracked.
             $table->timestamp('updated_at')->nullable();

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
@@ -24,7 +25,7 @@ class Room extends Model
     /** The game logic depends on these ids, in this order (room codes 1..5). */
     public const KEYS = ['treasury', 'lair', 'hatchery', 'training', 'library'];
 
-    protected $fillable = ['key', 'name', 'cost', 'color', 'tip'];
+    protected $fillable = ['key', 'name', 'cost', 'tip'];
 
     public function configDefaults(): ?array
     {
@@ -34,5 +35,15 @@ class Room extends Model
     public static function configOrder(): array
     {
         return array_map(fn (string $key): array => ['key' => $key], array_keys(config('underlord.rooms')));
+    }
+
+    /**
+     * The colour is fixed in config/underlord/rooms.php, like the SVG that goes with it; it is not stored or edited.
+     *
+     * @return Attribute<string|null, never>
+     */
+    protected function color(): Attribute
+    {
+        return Attribute::get(fn (): ?string => config("underlord.rooms.{$this->key}.color"));
     }
 }

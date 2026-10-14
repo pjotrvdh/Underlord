@@ -5,14 +5,13 @@ namespace App\Filament\Resources\Creatures\Schemas;
 use App\Filament\Schemas\FormLayout;
 use App\Models\Creature;
 use App\Models\Room;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Schema;
 
 class CreatureForm
@@ -25,16 +24,9 @@ class CreatureForm
             ->components([
                 FormLayout::make(
                     main: [
-                        Flex::make([
-                            TextInput::make('name')->withDefault()
-                                ->label(__('resource.creature.fields.name'))
-                                ->required(),
-                            ColorPicker::make('color')->withDefault()
-                                ->label(__('resource.creature.fields.color'))
-                                ->required()
-                                ->grow(false),
-                        ])
-                            ->from('md')
+                        TextInput::make('name')->withDefault()
+                            ->label(__('resource.creature.fields.name'))
+                            ->required()
                             ->columnSpanFull(),
                         Fieldset::make(__('resource.creature.fields.combat'))
                             ->columns(['default' => 1, 'xl' => 3])
@@ -78,6 +70,8 @@ class CreatureForm
                             ->imageSize(128)
                             ->extraImgAttributes(['style' => 'background:#241c17;border-radius:8px;padding:8px'])
                             ->visible(fn (?Creature $record): bool => $record?->assetUrl() !== null),
+                        ColorEntry::make('color')
+                            ->label(__('resource.creature.fields.color')),
                         TextEntry::make('key')
                             ->label(__('resource.creature.fields.key'))
                             ->helperText(__('resource.creature.helpers.key'))

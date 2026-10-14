@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Creatures\Pages\EditCreature;
+use App\Filament\Resources\Rooms\Pages\EditRoom;
 use App\Models\Creature;
 use App\Models\Room;
 use App\Models\Setting;
@@ -10,6 +12,7 @@ use App\Models\User;
 use App\Models\Wave;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -102,5 +105,18 @@ class AdminPanelTest extends TestCase
 
         $this->get('/admin/creatures')->assertOk()->assertSee('assets/units/troll.svg', false);
         $this->get('/admin/creatures/troll/edit')->assertOk()->assertSee('assets/units/troll.svg', false);
+    }
+
+    public function test_colours_come_from_config_and_are_not_editable(): void
+    {
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+
+        $this->assertSame(config('underlord.creatures.troll.color'), Creature::find('troll')->color);
+        $this->assertSame(config('underlord.rooms.lair.color'), Room::find('lair')->color);
+
+        Livewire::test(EditCreature::class, ['record' => 'troll'])
+            ->assertFormFieldDoesNotExist('color');
+        Livewire::test(EditRoom::class, ['record' => 'lair'])
+            ->assertFormFieldDoesNotExist('color');
     }
 }

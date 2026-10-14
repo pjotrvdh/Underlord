@@ -8,10 +8,11 @@ use App\Models\Setting;
 use App\Models\Spell;
 use App\Models\Wave;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
  * Puts the game's built-in data (config/underlord/*.php) into the database: settings,
- * creatures, rooms, spells and waves. The admin panel can only edit these records, never create
+ * creatures, rooms, spells and waves. Colours stay in config only; they are not editable. The admin panel can only edit these records, never create
  * them, so this is the one place they come from.
  *
  * sync() adds whatever is missing and leaves edited records alone; sync(reset: true) puts every
@@ -47,12 +48,11 @@ class GameDefaults
                 'bounty' => $c['bounty'] ?? 0,
                 'dig' => $c['dig'] ?? null,
                 'big' => $c['big'] ?? false,
-                'color' => $c['color'],
             ]);
         }
 
         foreach (config('underlord.rooms') as $key => $r) {
-            $this->put(Room::class, ['key' => $key], $r);
+            $this->put(Room::class, ['key' => $key], Arr::except($r, 'color'));
         }
 
         foreach (config('underlord.spells') as $key => $s) {

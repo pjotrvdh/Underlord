@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Creature extends Model
@@ -27,7 +28,7 @@ class Creature extends Model
 
     protected $fillable = [
         'key', 'side', 'name', 'hp', 'attack', 'speed', 'range', 'rate', 'wage', 'vision',
-        'pool', 'attract', 'bounty', 'dig', 'big', 'color',
+        'pool', 'attract', 'bounty', 'dig', 'big',
     ];
 
     protected function casts(): array
@@ -58,5 +59,15 @@ class Creature extends Model
         $path = config("underlord.assets.units.{$this->key}");
 
         return $path ? asset($path) : null;
+    }
+
+    /**
+     * The colour is fixed in config/underlord/creatures.php, like the SVG that goes with it; it is not stored or edited.
+     *
+     * @return Attribute<string|null, never>
+     */
+    protected function color(): Attribute
+    {
+        return Attribute::get(fn (): ?string => config("underlord.creatures.{$this->key}.color"));
     }
 }

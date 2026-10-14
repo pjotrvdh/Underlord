@@ -14,7 +14,7 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 - `App\Services\GameDefaults` adds missing defaults after every `artisan migrate`, without overwriting edits. `ddev exec artisan underlord:defaults --reset` restores everything.
 - **The admin panel only edits game data.** It never creates or deletes it. New game data goes into config.
 - **Game data tables have no `created_at`.** They have `updated_at` and `updated_by`, which is set from the logged-in user.
-- **Assets** (SVGs) are managed in the project: `config/underlord/assets.php` and `public/assets/`.
+- **Assets** (SVGs) and the **colours** of creatures and rooms are managed in the project, not in the database: `config/underlord/assets.php`, `public/assets/` and the `color` entries in the config. The admin panel shows them read-only.
 - `App\Services\GameConfig` builds and caches the object the game reads. Model events clear that cache.
 
 ## Git
