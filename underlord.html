@@ -27,6 +27,11 @@ h1{font-family:var(--f-display);font-weight:700;font-size:30px;margin:0;line-hei
 .hbar{height:8px;border-radius:2px;background:#2a1311;overflow:hidden;margin-top:4px;border:1px solid #4a1d18}
 .hbar i{display:block;height:100%;background:linear-gradient(90deg,#7d1410,var(--blood-hi));width:100%;transition:width .2s}
 .ctrl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cheats{position:absolute;top:10px;right:10px;width:min(300px,calc(100% - 20px));background:rgba(22,16,14,.96);border:1px solid var(--blood);border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 20px);overflow-y:auto;z-index:2}
+.cheats h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0;color:var(--blood-hi)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cgrid button{font-size:13px;padding:6px 8px;text-align:left}
+#bCheat[aria-expanded="true"]{border-color:var(--blood-hi);background:#2c1412}
 .saved{font-size:12px;color:var(--muted);min-width:0}
 button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
 button:hover:not(:disabled){border-color:#5a4033;background:#261b17}
@@ -93,6 +98,7 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
       <span class="saved" id="savedAt"></span>
       <button id="bSave" type="button">Save</button>
       <button id="bLoad" type="button">Load</button>
+      <button id="bCheat" type="button" aria-expanded="false" aria-controls="cheats">Cheats</button>
       <button id="bPause" type="button">Pause</button>
       <button id="bSpeed" type="button">1×</button>
     </div>
@@ -102,6 +108,10 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
     <canvas id="cv"></canvas>
     <div class="banner" id="banner"></div>
     <div class="tip" id="tip" hidden></div>
+    <div class="cheats" id="cheats" hidden>
+      <h2>Cheats</h2>
+      <div class="cgrid" id="cheatList"></div>
+    </div>
     <div class="zoom"><button id="zin" type="button" title="Zoom in">+</button><button id="zout" type="button" title="Zoom out">−</button><button id="zfit" class="fit" type="button" title="Show the whole map">Fit</button></div>
     <div class="overlay" id="ov">
       <div class="card">
@@ -135,7 +145,8 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
 <script>
 (()=>{
 const W=40,H=26,N=W*H;
-const ROCK=0,EARTH=1,GOLD=2,GEM=3,FLOOR=4,CLAIM=5,HEART=6,PORTAL=7,GATE=8,LAVA=9;
+const ROCK=0,EARTH=1,GOLD=2,GEM=3,FLOOR=4,CLAIM=5,HEART=6,PORTAL=7,GATE=8,LAVA=9,WALL=10;
+const WALL_HP=8;
 const TREAS=1,LAIR=2,HATCH=3,TRAIN=4,LIB=5;
 const ROOMS={
   1:{n:'Treasury',cost:50,col:'#e3b23c',tip:'Stores 500 gold per tile'},
@@ -170,9 +181,12 @@ const SPELLS={
   heal:{n:'Heal',cost:200,req:400},
   rally:{n:'Call to Arms',cost:300,req:800},
 };
-const STATE_EN={think:'thinking',walk:'on the move',dig:'digging',claim:'claiming ground',sleep:'sleeping',eat:'eating',train:'training',study:'studying',fight:'fighting',march:'advancing',leave:'leaving',idle:'loitering',flee:'fleeing',guard:'guarding',neutral:'wandering, unaligned'};
+const STATE_EN={think:'thinking',walk:'on the move',dig:'digging',claim:'claiming ground',reinforce:'reinforcing a wall',sleep:'sleeping',eat:'eating',train:'training',study:'studying',fight:'fighting',march:'advancing',leave:'leaving',idle:'loitering',flee:'fleeing',guard:'guarding',neutral:'wandering, unaligned'};
 const N4=[[1,0],[-1,0],[0,1],[0,-1]];
-const HEART_CAP=1500, TREAS_CAP=500;
+// Economy knobs in one place, so a difficulty setting can scale them later.
+const ECON={startGold:1500,heartCap:1500,treasCap:500,seamGold:300,goldVeins:13,payInterval:180,wageMul:1,trainCost:1.5,bountyMul:1};
+const HEART_CAP=ECON.heartCap, TREAS_CAP=ECON.treasCap;
+const wage=k=>Math.round(KINDS[k].wage*ECON.wageMul);
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), stage=document.getElementById('stage');
 const fogC=document.createElement('canvas');fogC.width=W;fogC.height=H;const fogX=fogC.getContext('2d');
@@ -187,7 +201,7 @@ const hash=(x,y,s=0)=>{let h=(x*374761393+y*668265263+s*982451653)|0;h=Math.imul
 const ti=e=>ix(Math.floor(e.x),Math.floor(e.y));
 const walk=i=>{const t=G.t[i];return t===FLOOR||t===CLAIM||t===PORTAL||t===GATE;};
 const transp=i=>{const t=G.t[i];return t===FLOOR||t===CLAIM||t===PORTAL||t===GATE||t===HEART||t===LAVA;};
-const diggable=i=>{const t=G.t[i];return t===EARTH||t===GOLD||t===GEM;};
+const diggable=i=>{const t=G.t[i];return t===EARTH||t===GOLD||t===GEM||t===WALL;};
 const nb=(i,f)=>{const x=tx(i),y=ty(i);for(const[dx,dy]of N4){const a=x+dx,b=y+dy;if(inb(a,b)&&f(ix(a,b)))return ix(a,b);}return -1;};
 const adjHeart=i=>nb(i,j=>G.t[j]===HEART)>=0;
 const cap=()=>HEART_CAP+TREAS_CAP*G.rc[TREAS];
@@ -210,7 +224,7 @@ function bfs(start,goal,k=1,pass=walk,maxLen=1e9){
     for(const[dx,dy]of N4){const a=x+dx,b=y+dy;if(!inb(a,b))continue;const n=ix(a,b);if(prev[n]!==-2||!pass(n))continue;prev[n]=c;dep[n]=dep[c]+1;q.push(n);if(goal(n)){m.push(n);if(m.length>=k)break;}}}
   if(!m.length)return null;const g=m[rand(m.length)];return g===start?[]:buildPath(prev,g,start);
 }
-function hcost(i){if(walk(i))return 1;const t=G.t[i];return t===EARTH?4:t===GOLD?6:-1;}
+function hcost(i){if(walk(i))return 1;const t=G.t[i];return t===EARTH?4:t===GOLD?6:t===WALL?12:-1;}
 function dijkstra(start,goal){
   const dist=new Float32Array(N).fill(1e9),prev=new Int32Array(N).fill(-1),hp=[];
   const push=(d,i)=>{hp.push([d,i]);let c=hp.length-1;while(c>0){const p=(c-1)>>1;if(hp[p][0]<=hp[c][0])break;[hp[p],hp[c]]=[hp[c],hp[p]];c=p;}};
@@ -229,7 +243,7 @@ function genMap(){
     for(let x=0;x<W;x++){t[ix(x,0)]=ROCK;t[ix(x,H-1)]=ROCK;}
     for(let y=0;y<H;y++){t[ix(0,y)]=ROCK;t[ix(W-1,y)]=ROCK;}
     const blob=(type,n,len)=>{for(let k=0;k<n;k++){let x=2+rand(W-4),y=2+rand(H-4);for(let s=0;s<len;s++){if(x>0&&y>0&&x<W-1&&y<H-1)t[ix(x,y)]=type;const[dx,dy]=N4[rand(4)];x+=dx;y+=dy;}}};
-    blob(GOLD,12,7);blob(LAVA,2,5);
+    blob(GOLD,ECON.goldVeins,7);blob(LAVA,2,5);
     for(let k=0;k<2;k++)t[ix(16+rand(18),3+rand(H-6))]=GEM;
     const hx=5,hy=H>>1;
     // hidden caverns
@@ -253,7 +267,7 @@ function genMap(){
     G.t=t;G.hx=hx;G.hy=hy;G.portals=portals;G.portal=portals[0];G.gate=ix(gx,gy);
     if(dijkstra(G.gate,i=>adjHeart(i)))break;
   }
-  for(let i=0;i<N;i++){G.hp[i]=G.t[i]===GOLD?5:3;G.gold[i]=G.t[i]===GOLD?250:0;}
+  for(let i=0;i<N;i++){G.hp[i]=G.t[i]===GOLD?5:3;G.gold[i]=G.t[i]===GOLD?ECON.seamGold:0;}
   // populate the caverns (hero camp in the one farthest from the heart)
   caves.sort((a,b)=>Math.hypot(b.x-G.hx,b.y-G.hy)-Math.hypot(a.x-G.hx,a.y-G.hy));
   caves.forEach((c,k)=>{
@@ -269,8 +283,8 @@ function genMap(){
 
 function newGame(){
   G={t:null,room:new Uint8Array(N),mark:new Uint8Array(N),hp:new Uint8Array(N),gold:new Int16Array(N),seen:new Uint8Array(N),loot:new Int16Array(N),
-     res:new Map(),rc:[0,0,0,0,0,0],ents:[],fx:[],money:1500,heartHP:2500,heartMax:2500,heartFlash:0,
-     time:0,nextWave:300,zapT:0,wave:0,spawnQ:[],research:0,payT:150,pown:new Uint8Array(N),pool:{goblin:8,warlock:5,troll:5,mistress:3},portalT:6,idc:1,
+     res:new Map(),rc:[0,0,0,0,0,0],ents:[],fx:[],money:ECON.startGold,heartHP:2500,heartMax:2500,heartFlash:0,
+     time:0,nextWave:300,zapT:0,wave:0,spawnQ:[],research:0,payT:ECON.payInterval,pown:new Uint8Array(N),pool:{goblin:8,warlock:5,troll:5,mistress:3},portalT:6,idc:1,
      held:[],over:null,rally:null,msgCd:{},visT:0};
   genMap();
   const ring=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM)ring.push(i);
@@ -360,6 +374,8 @@ function impThink(e){
   if(p){const end=p.length?p[p.length-1]:here;reserve(e,end);e.task=end;go(e,p,'claim',1.2);return;}
   p=bfs(here,i=>G.loot[i]>0,1,walk,30);
   if(p){go(e,p,'idle',.5);return;}
+  p=bfs(here,i=>G.t[i]===CLAIM&&reinforceTarget(i)>=0,1,walk,40);
+  if(p){const end=p.length?p[p.length-1]:here,j=reinforceTarget(end);reserve(e,j);e.task=j;go(e,p,'reinforce',.5);return;}
   p=bfs(here,i=>G.t[i]===CLAIM&&!G.room[i],6,walk,4);
   if(p&&Math.random()<.5)go(e,p,'idle',1+Math.random()*1.5);else{e.state='idle';e.timer=.8+Math.random();}
 }
@@ -369,11 +385,21 @@ function doDig(e,dt){
   e.face=Math.sign(tx(j)-tx(ti(e)))||e.face;
   e.timer-=dt*(e.slap>0?1.8:1);if(e.timer>0)return;e.timer=.38;
   const t=G.t[j];
-  if(t===EARTH){if(--G.hp[j]<=0)openTile(j);}
+  if(t===EARTH||t===WALL){if(--G.hp[j]<=0)openTile(j);}
   else if(t===GOLD){const g=Math.min(20,G.gold[j]);G.gold[j]-=g;e.carry+=g;if(G.gold[j]<=0)openTile(j);}
   else if(t===GEM){e.carry+=20;}
-  fx({type:'dust',x:(e.x+tx(j)+.5)/2,y:(e.y+ty(j)+.5)/2,dur:.35,col:t===EARTH?'#8a6446':'#f2cb55'});
+  fx({type:'dust',x:(e.x+tx(j)+.5)/2,y:(e.y+ty(j)+.5)/2,dur:.35,col:t===EARTH?'#8a6446':t===WALL?'#9a8a80':'#f2cb55'});
   if(e.carry>=100&&(G.money<cap()||t!==EARTH))e.state='think';
+}
+// Idle imps fortify earth walls that border your territory (as in Dungeon Keeper).
+function reinforceTarget(i){return nb(i,j=>G.t[j]===EARTH&&!G.mark[j]&&!G.res.has(j));}
+function doReinforce(e,dt){
+  const j=e.task;
+  if(j<0||G.t[j]!==EARTH||G.mark[j]||G.t[ti(e)]!==CLAIM||nb(ti(e),k=>k===j)<0){e.state='think';return;}
+  e.face=Math.sign(tx(j)-tx(ti(e)))||e.face;
+  e.timer-=dt*(e.slap>0?1.8:1);if(e.timer>0)return;e.timer=.5;
+  e.work=(e.work||0)+1;fx({type:'dust',x:(e.x+tx(j)+.5)/2,y:(e.y+ty(j)+.5)/2,dur:.3,col:'#b8a89a'});
+  if(e.work>=5){e.work=0;G.t[j]=WALL;G.hp[j]=WALL_HP;e.state='think';}
 }
 function doClaim(e,dt){
   const i=ti(e);
@@ -441,7 +467,7 @@ function attack(e,t){
 }
 function kill(t){
   t.dead=true;release(t);
-  if(t.side===1){const k=KINDS[t.kind],a=addGold(k.bounty);fx({type:'text',x:t.x,y:t.y,dur:1.2,txt:'+'+a,col:'#e3b23c'});
+  if(t.side===1){const k=KINDS[t.kind],a=addGold(Math.round(k.bounty*ECON.bountyMul));fx({type:'text',x:t.x,y:t.y,dur:1.2,txt:'+'+a,col:'#e3b23c'});
     if(t.kind==='lord')msg('The Lord of the Land has fallen!','lord','good');}
   else{toPool(t);msg((t.kind==='imp'?'An imp':'Your '+KINDS[t.kind].n)+' has been slain.','die'+t.id,'bad');}
 }
@@ -491,9 +517,10 @@ function tick(e,dt){
     case 'idle':if((e.timer-=dt)<=0)e.state='think';break;
     case 'dig':doDig(e,dt);break;
     case 'claim':doClaim(e,dt);break;
+    case 'reinforce':doReinforce(e,dt);break;
     case 'sleep':if(G.room[ti(e)]!==LAIR){e.state='think';break;}e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.06*dt);if(e.hp>=e.maxhp)e.state='think';break;
     case 'eat':if(G.room[ti(e)]!==HATCH){e.state='think';break;}if((e.timer-=dt)<=0){e.hunger=0;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.15);e.state='think';}break;
-    case 'train':if(G.room[ti(e)]!==TRAIN||G.money<=0){e.state='think';break;}G.money=Math.max(0,G.money-2*dt);gainXP(e,(e.kind==='troll'?11:9)*dt);if((e.timer-=dt)<=0)e.state='think';break;
+    case 'train':if(G.room[ti(e)]!==TRAIN||G.money<=0){e.state='think';break;}G.money=Math.max(0,G.money-ECON.trainCost*dt);gainXP(e,(e.kind==='troll'?11:9)*dt);if((e.timer-=dt)<=0)e.state='think';break;
     case 'study':if(G.room[ti(e)]!==LIB){e.state='think';break;}research(dt*(e.kind==='warlock'?4:1.2));if((e.timer-=dt)<=0)e.state='think';break;
     case 'fight':fight(e,dt);break;
     case 'march':march(e,dt);break;
@@ -516,7 +543,7 @@ function tryAttract(){
 }
 function payday(){
   let paid=0,gone=0;
-  for(const e of creatures()){if(e.state==='leave')continue;const w=KINDS[e.kind].wage;
+  for(const e of creatures()){if(e.state==='leave')continue;const w=wage(e.kind);
     if(G.money>=w){G.money-=w;paid+=w;fx({type:'text',x:e.x,y:e.y-.4,dur:1,txt:'-'+w,col:'#e3b23c'});}else{gone++;leave(e,'unpaid');}}
   if(paid||gone)msg('Payday: '+paid+' gold paid out'+(gone?', '+gone+' went unpaid.':'.'),'pay'+G.time,gone?'bad':'');
 }
@@ -536,7 +563,7 @@ function update(dt){
   for(const q of G.spawnQ)q.t-=dt;
   while(G.spawnQ.length&&G.spawnQ[0].t<=0){const q=G.spawnQ.shift(),e=spawn(q.k,tx(G.gate),ty(G.gate),1+.12*(G.wave-1));fx({type:'ring',x:e.x,y:e.y,dur:.6,col:'#bcd2f0'});}
   if(anyPortal()){G.portalT-=dt;if(G.portalT<=0){G.portalT=20;tryAttract();}}
-  G.payT-=dt;if(G.payT<=0){G.payT=150;payday();}
+  G.payT-=dt;if(G.payT<=0){G.payT=ECON.payInterval;payday();}
   if(G.heartFlash>0)G.heartFlash-=dt;
   if((G.zapT-=dt)<=0){const c={x:G.hx+.5,y:G.hy+.5};let best=null,bd=2.9;
     for(const o of G.ents){if(o.dead||o.side!==1)continue;const d=Math.hypot(o.x-c.x,o.y-c.y);if(d<bd){bd=d;best=o;}}
@@ -626,7 +653,7 @@ async function refreshContinue(){const s=await readSave();const b=document.getEl
 /* ---------- drawing ---------- */
 function rr(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
 function circ(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
-function solidForShade(i){const t=G.t[i];return t===ROCK||t===EARTH||t===GOLD||t===GEM;}
+function solidForShade(i){const t=G.t[i];return t===ROCK||t===EARTH||t===GOLD||t===GEM||t===WALL;}
 function drawEarthBase(px,py,s,x,y){
   rr(px,py,s,s,'#2e2017');
   const h=hash(x,y);rr(px+1,py+1,s-2,s-2,['#4b3423','#4f3725','#46301f'][h*3|0]);
@@ -640,6 +667,10 @@ function drawTile(x,y,now){
     case ROCK:{rr(px,py,s,s,'#0f0e12');rr(px+1,py+1,s-2,s-2,['#1b1a21','#1e1d24','#18171d'][hash(x,y)*3|0]);
       for(let k=0;k<2;k++)rr(px+hash(x,y,k+3)*(s-4)+1,py+hash(x,y,k+5)*(s-4)+1,s*.18,s*.08,'rgba(255,255,255,.05)');break;}
     case EARTH:drawEarthBase(px,py,s,x,y);break;
+    case WALL:{rr(px,py,s,s,'#1a1513');const bh=s/3;
+      for(let r=0;r<3;r++){const off=(r%2)*s/4;for(let c=-1;c<3;c++){const bx=px+off+c*s/2,x0=Math.max(px+1,bx+1),x1=Math.min(px+s-1,bx+s/2-1);if(x1>x0)rr(x0,py+r*bh+1,x1-x0,bh-2,hash(x*4+c,y*3+r)<.5?'#4a3f3a':'#433833');}}
+      rr(px+1,py+1,s-2,s*.08,'rgba(255,230,210,.10)');
+      if(G.hp[i]<WALL_HP)rr(px+s*.3,py+s*.3,s*.4,s*.06,'rgba(0,0,0,.5)');break;}
     case GOLD:{drawEarthBase(px,py,s,x,y);for(let k=0;k<3;k++){const gx=px+s*(.2+hash(x,y,k+11)*.6),gy=py+s*(.2+hash(x,y,k+21)*.6);circ(gx,gy,s*.11,'#c8941f');circ(gx-s*.03,gy-s*.03,s*.05,'#ffe18a');}
       if(Math.sin(now*2.5+hash(x,y)*40)>.96)circ(px+s*.5,py+s*.4,s*.06,'#fff6d0');break;}
     case GEM:{drawEarthBase(px,py,s,x,y);const c=['#56d6ea','#c27cf5'];for(let k=0;k<2;k++){const gx=px+s*(.3+k*.35),gy=py+s*(.35+hash(x,y,k)*.3),r=s*.14;ctx.fillStyle=c[k];ctx.beginPath();ctx.moveTo(gx,gy-r);ctx.lineTo(gx+r*.7,gy);ctx.lineTo(gx,gy+r);ctx.lineTo(gx-r*.7,gy);ctx.fill();}
@@ -655,7 +686,7 @@ function drawTile(x,y,now){
   if(t===FLOOR||t===CLAIM||t===GATE||t===PORTAL){
     if(y>0&&solidForShade(i-W)){rr(px,py,s,s*.28,'rgba(0,0,0,.35)');rr(px,py,s,s*.12,'rgba(0,0,0,.3)');}
     if(x>0&&solidForShade(i-1))rr(px,py,s*.14,s,'rgba(0,0,0,.25)');
-  }else if(t===EARTH||t===GOLD||t===GEM){
+  }else if(t===EARTH||t===GOLD||t===GEM||t===WALL){
     if(y<H-1&&walk(i+W))rr(px,py+s*.8,s,s*.2,'rgba(0,0,0,.4)');
   }
   if(G.loot[i]>0){const cx=px+s/2,cy=py+s*.58;rr(cx-s*.24,cy-s*.12,s*.48,s*.28,'#6b3f1c');rr(cx-s*.24,cy-s*.2,s*.48,s*.1,'#8a5426');rr(cx-s*.04,cy-s*.12,s*.08,s*.1,'#e3b23c');
@@ -904,14 +935,15 @@ for(const[k,d]of Object.entries(TOOLDEFS)){
 function setTool(k){tool=k;for(const[n,b]of Object.entries(btns))b.classList.toggle('on',n===k);cv.classList.toggle('grab',k==='look');}
 setTool('hand');
 const fmtT=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
-const TILE_EN={0:'Rock (impenetrable)',1:'Earth',2:'Gold seam',3:'Gem seam (never runs out)',4:'Unclaimed ground',5:'Your territory',6:'Dungeon Heart',8:'Hero Gate',9:'Lava'};
+const TILE_EN={0:'Rock (impenetrable)',1:'Earth',2:'Gold seam',3:'Gem seam (never runs out)',4:'Unclaimed ground',5:'Your territory',6:'Dungeon Heart',8:'Hero Gate',9:'Lava',10:'Reinforced wall (slows heroes down)'};
 function ui(){
   const $=id=>document.getElementById(id);
   $('sGold').textContent=Math.floor(G.money)+' / '+cap();
   $('sImps').textContent=G.ents.filter(e=>e.kind==='imp'&&e.side===0).length+G.held.filter(e=>e.kind==='imp').length;
   $('sCre').textContent=creatures().length+G.held.filter(e=>e.kind!=='imp').length+' / '+G.rc[LAIR];
   $('sRes').textContent=Math.floor(G.research);
-  $('sPay').textContent=fmtT(G.payT);
+  const due=creatures().concat(G.held.filter(e=>e.kind!=='imp')).reduce((a,e)=>a+wage(e.kind),0);
+  $('sPay').textContent=fmtT(G.payT)+(due?' · '+due+'g':'');$('sPay').style.color=due>G.money?'#f08a7e':'';
   $('sWave').textContent=G.wave>=WAVES.length?'final wave':('wave '+(G.wave+1)+' in '+fmtT(G.nextWave));
   $('sHeart').style.width=(100*G.heartHP/G.heartMax)+'%';
   for(const[k,s]of Object.entries(SPELLS)){const b=btns[k],locked=G.research<s.req;b.disabled=locked;
@@ -922,7 +954,7 @@ function ui(){
     const e=G.ents.find(o=>!o.dead&&!o.held&&(o.side===0||G.seen[ti(o)])&&Math.hypot(o.x-hover.fx,o.y-hover.fy)<.45);
     if(!G.seen[i])h='<b>Unexplored</b>'+(G.t[i]===GOLD?' · gold glints through':G.t[i]===GEM?' · gems glint through':'')+(G.mark[i]?'<br>Marked for digging':'')+'<br>You can mark it for digging. Your imps will find out what is there.';
     else if(e){const k=KINDS[e.kind];h='<b>'+(e.side===2?'Unknown creature':k.n)+'</b>'+(e.side===1?' · hero':'')+' · level '+e.lvl+'<br>'+Math.ceil(e.hp)+' / '+Math.ceil(e.maxhp)+' health · '+STATE_EN[e.state];
-      if(e.side===0&&e.kind!=='imp')h+='<br>Wage '+k.wage+' · hunger '+Math.floor(Math.min(100,e.hunger))+'%';if(e.carry)h+='<br>Carrying '+e.carry+' gold';}
+      if(e.side===0&&e.kind!=='imp')h+='<br>Wage '+wage(e.kind)+' · hunger '+Math.floor(Math.min(100,e.hunger))+'%';if(e.carry)h+='<br>Carrying '+e.carry+' gold';}
     else{const t=G.t[i];
       h='<b>'+(t===PORTAL?(G.pown[i]?'Portal (yours)':'Portal (not yet claimed)'):TILE_EN[t])+'</b>';if(t===PORTAL)h+=G.pown[i]?'<br>Drop a creature here to dismiss it.':'<br>Claim the ground next to it, then your imps claim the portal.';if(t===GOLD)h+=' · '+G.gold[i]+' gold';if(G.mark[i])h+='<br>Marked for digging';
       if(G.loot[i])h+='<br>Treasure chest: '+G.loot[i]+' gold';
@@ -950,13 +982,30 @@ document.getElementById('zout').onclick=()=>zoomAt(Z/1.25,SW/2,SH/2);
 document.getElementById('zfit').onclick=()=>zoomAt(1,SW/2,SH/2);
 document.getElementById('bStart').onclick=()=>{newGame();document.getElementById('ov').hidden=true;running=true;};
 document.getElementById('bContinue').onclick=()=>loadGame();
+const CHEATS=[
+  ['+500 gold',()=>{G.money+=500;return '+500 gold';}],
+  ['+5000 gold',()=>{G.money+=5000;return '+5000 gold';}],
+  ['Reveal map',()=>{G.seen.fill(1);G.fogDirty=true;return 'map revealed';}],
+  ['Finish research',()=>{research(Math.max(0,SPELLS.rally.req-G.research));return 'all spells unlocked';}],
+  ['Restore Heart',()=>{G.heartHP=G.heartMax;return 'Heart restored';}],
+  ['Free imp',()=>{const r=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM)r.push(i);const i=r[rand(r.length)];spawn('imp',tx(i),ty(i));return 'free imp';}],
+  ...['goblin','warlock','troll','mistress'].map(k=>['+ '+KINDS[k].n,()=>{const p=G.portals.find(q=>G.pown[q]);const i=p!==undefined?p:ix(G.hx+2,G.hy);const e=spawn(k,tx(i),ty(i));fx({type:'ring',x:e.x,y:e.y,dur:.8,col:'#c58cff'});return KINDS[k].n+' summoned';}]),
+  ['Level up all',()=>{for(const e of creatures())gainXP(e,need(e)-e.xp);return 'creatures levelled up';}],
+  ['Next wave now',()=>{if(G.wave>=WAVES.length)return 'no waves left';G.nextWave=0;return 'next wave called';}],
+  ['Defeat heroes',()=>{let n=0;for(const e of G.ents)if(e.side===1&&!e.dead){kill(e);n++;}return n+' heroes defeated';}],
+];
+for(const[label,fn]of CHEATS){const b=document.createElement('button');b.type='button';b.textContent=label;
+  b.onclick=()=>{if(!running||G.over)return;const r=fn();msg('Cheat: '+r+'.','cheat'+G.time+label,'good');};document.getElementById('cheatList').appendChild(b);}
+function toggleCheats(open){const c=document.getElementById('cheats'),b=document.getElementById('bCheat');open=open??c.hidden;c.hidden=!open;b.setAttribute('aria-expanded',String(open));}
+document.getElementById('bCheat').onclick=()=>toggleCheats();
 document.getElementById('bSave').onclick=()=>{if(running)saveGame(false);};
 document.getElementById('bLoad').onclick=()=>loadGame();
 const keys=new Set();
 addEventListener('keydown',e=>{
   if(e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
   if(e.key===' '||e.key==='p'){e.preventDefault();paused=!paused;syncPause();}
-  else if(e.key==='Escape'){setTool('hand');drag=null;updateTip();}
+  else if(e.key==='Escape'){setTool('hand');drag=null;updateTip();toggleCheats(false);}
+  else if(e.key==='`'||e.key==='c'&&e.ctrlKey){e.preventDefault();toggleCheats();}
   else if(e.key>='1'&&e.key<='3')setSpeed(+e.key);
   else if(e.key==='+'||e.key==='=')zoomAt(Z*1.25,SW/2,SH/2);
   else if(e.key==='-'||e.key==='_')zoomAt(Z/1.25,SW/2,SH/2);

@@ -13,6 +13,7 @@ Open `underlord.html` in a browser. When it runs as a local file, saves go to th
 ## How to play
 
 - **Dig:** click a block to mark it for digging, or drag to mark a whole rectangle. You can mark blocks inside the clouds too. Your imps dig the blocks out, carry the gold to the Heart or a Treasury, and claim the new floor.
+- **Walls:** idle imps reinforce the earth walls around your territory. Heroes take much longer to tunnel through a reinforced wall.
 - **Explore:** the map is hidden in clouds. Your units reveal what they can see, and walls block their sight. Gold seams and the two portals shine through the clouds. Hidden caverns hold treasure chests, wandering creatures that join you, and a camp of sleeping heroes.
 - **Build:** you build rooms on claimed ground by clicking a tile or dragging a rectangle. The rooms are Treasury, Lair, Hatchery, Training Room and Library.
 - **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
@@ -31,6 +32,7 @@ Open `underlord.html` in a browser. When it runs as a local file, saves go to th
 | Pause | **Pause** button | `Space` / `P` |
 | Game speed | **1×** button | `1` `2` `3` |
 | Back to the hand tool | | `Esc` |
+| Cheats panel | **Cheats** button | `` ` `` |
 
 ## Development
 

@@ -9,13 +9,13 @@
 | pathfinding | `bfs(start, goalFn, k, passFn, maxLen)` picks randomly among the first `k` matches; `dijkstra` is for heroes and treats earth and gold as passable at a cost |
 | map | `genMap()`, `newGame()` |
 | vision | `los()` for tile sightlines, `vision()` reveals tiles and recruits neutrals, `rebuildFog()` |
-| entities | `spawn`, `reserve/release` for task reservations, `go/step/arrive` for movement, `impThink`, `doDig`, `doClaim`, `creatureThink`, `gainXP`, `research`, `leave`, `clearShot`, `nearestEnemy`, `attack`, `kill`, `fight`, `march`, `tick`, `toPool`, `tryAttract`, `payday`, `launchWave` |
+| entities | `spawn`, `reserve/release` for task reservations, `go/step/arrive` for movement, `impThink`, `doDig`, `doClaim`, `reinforceTarget`, `doReinforce`, `creatureThink`, `gainXP`, `research`, `leave`, `clearShot`, `nearestEnemy`, `attack`, `kill`, `fight`, `march`, `tick`, `toPool`, `tryAttract`, `payday`, `launchWave` |
 | update | `update(dt)` advances the whole simulation by one step; `end(win)` |
 | save / load | `serialize`, `deserialize`, `initStore`, `readSave`, `saveGame`, `loadGame`, `SAVE_V` |
 | drawing | `drawTile`, `drawRoom`, `drawSpecials` (Heart, portals, Gate), `drawEnt`, `makeCloud`, `drawFog`, `drawShroudTile`, `draw` |
 | camera | `setWorld`, `clampCam`, `zoomAt`, `centerOn` (these sit between the drawing helpers) |
 | input | `affects`, `toolValid`, `entAt`, `slapAt`, `build`, `sell`, `applyRect`, `cast`, pointer, wheel and key handlers, `updateTip` |
-| interface | `TOOLDEFS` (builds the toolbox buttons), `setTool`, `ui()` (stats, info box, Portal panel), `setSpeed`, `resize`, `frame` |
+| interface | `CHEATS` (cheats panel), `toggleCheats`, `TOOLDEFS` (builds the toolbox buttons), `setTool`, `ui()` (stats, info box, Portal panel), `setSpeed`, `resize`, `frame` |
 
 ## State
 

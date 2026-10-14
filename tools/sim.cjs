@@ -65,6 +65,9 @@ const secs = +(process.argv[2] || 700);
 let built = false;
 for (let t = 0; t <= secs; t += 0.05) {
   T.update(0.05);
+  // Like a player: every 30 s mark every explored gold or gem seam next to open ground.
+  if (Math.abs(t % 30) < 0.05) for (let i = 0; i < N; i++)
+    if ((g.t[i] === 2 || g.t[i] === 3) && g.seen[i] && [1, -1, W, -W].some(o => [4, 5].includes(g.t[i + o]))) g.mark[i] = 1;
   if (!built && t > 120) {
     // Build 9-tile rooms so every creature type can be attracted.
     built = true;
@@ -89,5 +92,6 @@ const save = T.serialize();
 T.deserialize(JSON.parse(JSON.stringify(save)));
 const after = T.G.ents.length;
 for (let k = 0; k < 200; k++) T.update(0.05);
+console.log(`reinforced walls: ${[...T.G.t].filter(x => x === 10).length}`);
 console.log(`save/load ok: ${(JSON.stringify(save).length / 1024).toFixed(1)} KB, entities ${before} saved, ${after} loaded`);
 if (after !== before) { console.error('entity count changed on reload'); process.exit(1); }

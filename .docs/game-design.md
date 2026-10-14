@@ -11,7 +11,7 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
   |---|---|---|
   | 0 | ROCK | Impenetrable. Only on the map border. |
   | 1 | EARTH | Takes 3 hits to dig. |
-  | 2 | GOLD | Holds 250 gold, and each hit yields 20. Heroes need 5 hits to dig through. |
+  | 2 | GOLD | Holds `ECON.seamGold` (300) gold, and each hit yields 20. Heroes need 5 hits to dig through. |
   | 3 | GEM | Yields 20 gold per hit forever and is never removed. |
   | 4 | FLOOR | Unclaimed. |
   | 5 | CLAIM | Your territory. Rooms can be built here. |
@@ -19,10 +19,11 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
   | 7 | PORTAL | Walkable. |
   | 8 | GATE | The heroes' entry point. |
   | 9 | LAVA | Not walkable, but you can see across it. |
+| 10 | WALL | A reinforced wall. Imps build it from earth next to your territory. Takes 8 hits to dig, and heroes path through it at cost 12. |
 
 - **Generation:**
   - Earth everywhere, with a border of rock.
-  - 12 gold veins, 2 small lava pools and 2 gems.
+  - `ECON.goldVeins` (13) gold veins, 2 small lava pools and 2 gems.
   - 5 hidden caverns.
   - The Heart sits at (5, H/2) inside a 7 × 7 claimed square, with a guaranteed gold vein 5 tiles to its right.
   - **Two portals**, each inside a 3 × 3 floor. One sits at x 14–18, about 7 rows above or below the Heart. The other sits at x 24–29 on the opposite side.
@@ -48,6 +49,9 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
 
 ## Economy
 
+All economy numbers live in the `ECON` object, so the planned difficulty setting can scale them: `startGold`, `heartCap`, `treasCap`, `seamGold`, `goldVeins`, `payInterval`, `wageMul`, `trainCost` and `bountyMul`.
+
+
 - **Storage:** the Heart holds 1500 gold, and each Treasury tile adds 500. Any gold above that capacity is refused: imps keep carrying it, and selling rooms can make you lose some.
 - You start with 1500 gold.
 - **Room prices** (per tile; selling returns half):
@@ -57,10 +61,10 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
   | Treasury | 50 | +500 storage |
   | Lair | 75 | one bed per tile |
   | Hatchery | 100 | creatures eat here |
-  | Training Room | 125 | XP; costs 2 gold/s per trainee |
+  | Training Room | 125 | XP; costs 1.5 gold/s per trainee |
   | Library | 125 | research |
 
-- **Payday** comes every 150 s and pays each creature its wage. A creature you cannot pay leaves through a portal.
+- **Payday** comes every 180 s and pays each creature its wage (`wage(kind)` = base wage × `wageMul`). The header shows the countdown and the total due, in red when you can't pay it. A creature you cannot pay leaves through a portal.
 - **Bounties:** killing heroes pays gold (see the table below).
 
 ## Imps
@@ -73,7 +77,8 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
   4. Deposit any gold that is left.
   5. Claim any floor next to claimed ground.
   6. Fetch a nearby treasure chest.
-  7. Wander.
+  7. **Reinforce** an earth wall that borders claimed ground: stand on claimed ground next to it and hit 5 × 0.5 s, and it becomes WALL. Marked tiles are skipped.
+  8. Wander.
 - One dig hit takes 0.38 s and claiming a tile takes 1.2 s. A slapped imp works 1.8× faster and moves 1.7× faster for 10 s, and loses 4 HP.
 - Imps flee to the Heart when a hero is within 3.2 tiles with line of sight.
 - A portal is claimed like floor: it needs claimed ground next to it.
@@ -141,6 +146,22 @@ Every mechanic and number below comes from `underlord.html`. When you change a n
 | Lightning | 150 | 250 | 90 damage to heroes within 1.6 tiles; the spot must be explored |
 | Heal | 400 | 200 | full heal for your units within 2.5 tiles |
 | Call to Arms | 800 | 300 | all creatures gather at the spot for 20 s |
+
+## Cheats
+
+The **Cheats** button in the header (shortcut: the backtick key or `Ctrl+C`) opens a panel with:
+
+- +500 or +5000 gold (this may go over storage capacity)
+- Reveal map
+- Finish research
+- Restore Heart
+- Free imp
+- Summon a creature of each type (this skips the pool)
+- Level up all
+- Next wave now
+- Defeat heroes
+
+Every cheat is logged in the chronicle.
 
 ## Win and lose
 

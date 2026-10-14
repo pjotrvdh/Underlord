@@ -22,6 +22,10 @@ The owner (pjotr, Dutch-speaking) asked for these things, in this order. Keep th
    **Invented:** the Troll needs a 9-tile Lair and Hatchery (modelled on the DK Bile Demon's 25 + 25), and the Dark Mistress needs a 9-tile Training Room. The pool sizes (8/5/5/3) and the limit of 15 are our own numbers.
 10. **Impenetrable rock only on the world border.** Two small lava pools remain inside the map.
 
+11. **Economy tuning**, with a difficulty setting planned later. All the knobs are in `ECON`. The earlier "gold runs out" finding came mostly from the sim, which mined no gold. Once the sim mines like a player, gold sits at the storage cap. We nudged the numbers anyway (seams hold 300, 13 veins, payday every 180 s, training 1.5 gold/s) and added a total of wages due to the header.
+12. **A cheats menu** with +500 gold and more.
+13. **Imps reinforce walls,** as in DK: idle imps fortify earth that borders your territory. Heroes can still break through, but slowly, while dwarves (0.3 s per hit) go through much faster. You can still dig your own walls (8 hits).
+
 ## Our own balancing decisions
 
 These came out of the headless simulation:
@@ -34,5 +38,5 @@ These came out of the headless simulation:
 
 ## Known open points
 
-- **Wages drain gold fast** once you have many creatures: in the sim, gold runs close to 0 by about 600 s. The economy may need tuning, for example cheaper wages, more gold, or a creature limit tied to Lair size.
+- **Difficulty setting** (planned): it should scale the `ECON` values, plus the hero waves.
 - There is **no real browser test yet:** rendering, input, zoom and fog have not been checked visually by an agent.
