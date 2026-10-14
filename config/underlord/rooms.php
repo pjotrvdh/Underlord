@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Default rooms, in toolbox order. The keys are fixed (the game logic depends on them);
  * name, cost (gold per tile), color and tip can be changed in the admin panel.
  */
-
 return [
     'treasury' => [
         'name' => 'Treasury',

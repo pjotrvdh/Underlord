@@ -15,7 +15,8 @@ trait TracksUpdatedBy
     protected static function bootTracksUpdatedBy(): void
     {
         static::saving(function (self $model): void {
-            $model->updated_by = Auth::id();
+            $user = Auth::user();
+            $model->updated_by = $user instanceof User ? $user->id : null;
         });
     }
 

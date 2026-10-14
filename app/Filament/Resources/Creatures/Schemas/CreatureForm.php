@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\Creatures\Schemas;
 
 use App\Filament\Schemas\FormLayout;
+use App\Filament\Support\DefaultValue;
 use App\Models\Creature;
 use App\Models\Room;
+use App\Support\GameData;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -24,7 +26,7 @@ class CreatureForm
             ->components([
                 FormLayout::make(
                     main: [
-                        TextInput::make('name')->withDefault()
+                        DefaultValue::on(TextInput::make('name'))
                             ->label(__('resource.creature.fields.name'))
                             ->required()
                             ->columnSpanFull(),
@@ -32,35 +34,35 @@ class CreatureForm
                             ->columns(['default' => 1, 'xl' => 3])
                             ->columnSpanFull()
                             ->schema([
-                                TextInput::make('hp')->withDefault()->label(__('resource.creature.fields.hp'))->required()->numeric()->minValue(1),
-                                TextInput::make('attack')->withDefault()->label(__('resource.creature.fields.attack'))->required()->numeric()->minValue(0),
-                                TextInput::make('speed')->withDefault()->label(__('resource.creature.fields.speed'))->helperText(__('resource.creature.helpers.speed'))->required()->numeric()->step(0.1),
-                                TextInput::make('range')->withDefault()->label(__('resource.creature.fields.range'))->helperText(__('resource.creature.helpers.range'))->required()->numeric()->step(0.5),
-                                TextInput::make('rate')->withDefault()->label(__('resource.creature.fields.rate'))->helperText(__('resource.creature.helpers.rate'))->required()->numeric()->step(0.1)->suffix('s'),
-                                TextInput::make('vision')->withDefault()->label(__('resource.creature.fields.vision'))->numeric()->suffix('tiles')->hidden($isHero),
+                                DefaultValue::on(TextInput::make('hp'))->label(__('resource.creature.fields.hp'))->required()->numeric()->minValue(1),
+                                DefaultValue::on(TextInput::make('attack'))->label(__('resource.creature.fields.attack'))->required()->numeric()->minValue(0),
+                                DefaultValue::on(TextInput::make('speed'))->label(__('resource.creature.fields.speed'))->helperText(__('resource.creature.helpers.speed'))->required()->numeric()->step(0.1),
+                                DefaultValue::on(TextInput::make('range'))->label(__('resource.creature.fields.range'))->helperText(__('resource.creature.helpers.range'))->required()->numeric()->step(0.5),
+                                DefaultValue::on(TextInput::make('rate'))->label(__('resource.creature.fields.rate'))->helperText(__('resource.creature.helpers.rate'))->required()->numeric()->step(0.1)->suffix('s'),
+                                DefaultValue::on(TextInput::make('vision'))->label(__('resource.creature.fields.vision'))->numeric()->suffix('tiles')->hidden($isHero),
                             ]),
                         Fieldset::make(__('resource.creature.fields.your_creature'))
                             ->columns(['default' => 1, 'xl' => 2])
                             ->columnSpanFull()
                             ->hidden($isHero)
                             ->schema([
-                                TextInput::make('wage')->withDefault()->label(__('resource.creature.fields.wage'))->helperText(__('resource.creature.helpers.wage'))->numeric()->suffix('gold'),
-                                TextInput::make('pool')->withDefault()->label(__('resource.creature.fields.pool'))->helperText(__('resource.creature.helpers.pool'))->numeric(),
-                                KeyValue::make('attract')->withDefault()
+                                DefaultValue::on(TextInput::make('wage'))->label(__('resource.creature.fields.wage'))->helperText(__('resource.creature.helpers.wage'))->numeric()->suffix('gold'),
+                                DefaultValue::on(TextInput::make('pool'))->label(__('resource.creature.fields.pool'))->helperText(__('resource.creature.helpers.pool'))->numeric(),
+                                DefaultValue::on(KeyValue::make('attract'))
                                     ->label(__('resource.creature.fields.attract'))
                                     ->helperText(__('resource.creature.helpers.attract', ['rooms' => implode(', ', Room::KEYS)]))
                                     ->keyLabel('Room')->valueLabel('Minimum tiles')
                                     ->columnSpanFull()
-                                    ->dehydrateStateUsing(fn ($state) => collect($state ?? [])->map(fn ($v) => (int) $v)->all()),
+                                    ->dehydrateStateUsing(GameData::intMap(...)),
                             ]),
                         Fieldset::make(__('resource.creature.fields.hero'))
                             ->columns(['default' => 1, 'xl' => 3])
                             ->columnSpanFull()
                             ->visible($isHero)
                             ->schema([
-                                TextInput::make('bounty')->withDefault()->label(__('resource.creature.fields.bounty'))->helperText(__('resource.creature.helpers.bounty'))->numeric()->suffix('gold'),
-                                TextInput::make('dig')->withDefault()->label(__('resource.creature.fields.dig'))->helperText(__('resource.creature.helpers.dig'))->numeric()->step(0.1)->suffix('s'),
-                                Toggle::make('big')->withDefault()->label(__('resource.creature.fields.big'))->inline(false),
+                                DefaultValue::on(TextInput::make('bounty'))->label(__('resource.creature.fields.bounty'))->helperText(__('resource.creature.helpers.bounty'))->numeric()->suffix('gold'),
+                                DefaultValue::on(TextInput::make('dig'))->label(__('resource.creature.fields.dig'))->helperText(__('resource.creature.helpers.dig'))->numeric()->step(0.1)->suffix('s'),
+                                DefaultValue::on(Toggle::make('big'))->label(__('resource.creature.fields.big'))->inline(false),
                             ]),
                     ],
                     aside: [

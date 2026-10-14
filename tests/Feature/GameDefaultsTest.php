@@ -15,28 +15,28 @@ class GameDefaultsTest extends TestCase
 
     public function test_migrating_fills_in_the_game_data(): void
     {
-        $this->assertSame(5, Creature::where('side', Creature::SIDE_CREATURE)->count());
-        $this->assertSame(1500, Setting::whereKey('economy.startGold')->value('value'));
+        $this->assertSame(5, Creature::query()->where('side', Creature::SIDE_CREATURE)->count());
+        $this->assertSame(1500, Setting::query()->whereKey('economy.startGold')->value('value'));
     }
 
     public function test_sync_adds_missing_records_and_keeps_edits(): void
     {
-        Setting::whereKey('economy.startGold')->update(['value' => 9000]);
-        Creature::where('key', 'troll')->delete();
+        Setting::query()->whereKey('economy.startGold')->update(['value' => 9000]);
+        Creature::query()->where('key', 'troll')->delete();
 
-        app(GameDefaults::class)->sync();
+        resolve(GameDefaults::class)->sync();
 
-        $this->assertSame(9000, Setting::whereKey('economy.startGold')->value('value'));
-        $this->assertTrue(Creature::where('key', 'troll')->exists());
+        $this->assertSame(9000, Setting::query()->whereKey('economy.startGold')->value('value'));
+        $this->assertTrue(Creature::query()->where('key', 'troll')->exists());
     }
 
     public function test_reset_puts_edits_back_to_the_defaults(): void
     {
-        Setting::whereKey('economy.startGold')->update(['value' => 9000]);
+        Setting::query()->whereKey('economy.startGold')->update(['value' => 9000]);
 
         $this->artisan('underlord:defaults', ['--reset' => true])->expectsConfirmation('This overwrites every change made in the admin panel. Continue?', 'yes')->assertSuccessful();
 
-        $this->assertSame(1500, Setting::whereKey('economy.startGold')->value('value'));
+        $this->assertSame(1500, Setting::query()->whereKey('economy.startGold')->value('value'));
     }
 
     public function test_the_admin_panel_cannot_create_game_data(): void
@@ -45,23 +45,23 @@ class GameDefaultsTest extends TestCase
 
         foreach (['settings', 'creatures', 'rooms', 'spells', 'waves'] as $resource) {
             $this->get("/admin/{$resource}/create")->assertNotFound();
-            $this->get("/admin/{$resource}")->assertOk()->assertDontSee("/admin/{$resource}/create", false);
+            $this->get("/admin/{$resource}")->assertOk()->assertDontSeeHtml("/admin/{$resource}/create");
         }
     }
 
     public function test_records_are_listed_in_config_order(): void
     {
-        $this->assertSame(array_keys(config('underlord.creatures')), Creature::inConfigOrder()->pluck('key')->all());
+        $this->assertSame(array_keys(config('underlord.creatures')), Creature::query()->inConfigOrder()->pluck('key')->all());
         $this->assertSame(
-            collect(config('underlord.settings'))->flatMap(fn ($values, $group) => array_map(fn ($key) => "{$group}.{$key}", array_keys($values)))->all(),
-            Setting::inConfigOrder()->pluck('key')->all(),
+            collect(config('underlord.settings'))->flatMap(fn ($values, $group): array => array_map(fn (int|string $key): string => "{$group}.{$key}", array_keys($values)))->all(),
+            Setting::query()->inConfigOrder()->pluck('key')->all(),
         );
     }
 
     public function test_edit_forms_show_the_default_and_flag_changes(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]));
-        $troll = Creature::where('key', 'troll')->first();
+        $troll = Creature::query()->where('key', 'troll')->first();
         $troll->update(['hp' => 999]);
 
         $this->get("/admin/creatures/{$troll->getKey()}/edit")
@@ -74,7 +74,7 @@ class GameDefaultsTest extends TestCase
 
     public function test_changes_record_who_made_them_and_defaults_do_not(): void
     {
-        $troll = Creature::where('key', 'troll')->first();
+        $troll = Creature::query()->where('key', 'troll')->first();
         $this->assertNull($troll->updated_at);
         $this->assertNull($troll->updated_by);
 

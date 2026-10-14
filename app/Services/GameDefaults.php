@@ -7,8 +7,8 @@ use App\Models\Room;
 use App\Models\Setting;
 use App\Models\Spell;
 use App\Models\Wave;
+use App\Support\GameData;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 
 /**
  * Puts the game's built-in data (config/underlord/*.php) into the database: settings,
@@ -26,13 +26,13 @@ class GameDefaults
     {
         $this->reset = $reset;
 
-        foreach (config('underlord.settings') as $group => $values) {
+        foreach (GameData::settings() as $group => $values) {
             foreach ($values as $key => $value) {
                 $this->put(Setting::class, ['key' => "{$group}.{$key}"], ['group' => $group, 'value' => $value]);
             }
         }
 
-        foreach (config('underlord.creatures') as $key => $c) {
+        foreach (GameData::creatures() as $key => $c) {
             $this->put(Creature::class, ['key' => $key], [
                 'side' => $c['side'],
                 'name' => $c['name'],
@@ -51,15 +51,15 @@ class GameDefaults
             ]);
         }
 
-        foreach (config('underlord.rooms') as $key => $r) {
-            $this->put(Room::class, ['key' => $key], Arr::except($r, 'color'));
+        foreach (GameData::rooms() as $key => $r) {
+            $this->put(Room::class, ['key' => $key], ['name' => $r['name'], 'cost' => $r['cost'], 'tip' => $r['tip']]);
         }
 
-        foreach (config('underlord.spells') as $key => $s) {
-            $this->put(Spell::class, ['key' => $key], $s);
+        foreach (GameData::spells() as $key => $s) {
+            $this->put(Spell::class, ['key' => $key], ['name' => $s['name'], 'research' => $s['research'], 'cost' => $s['cost'], 'params' => $s['params']]);
         }
 
-        foreach (config('underlord.waves') as $n => $heroes) {
+        foreach (GameData::waves() as $n => $heroes) {
             $this->put(Wave::class, ['number' => $n + 1], ['heroes' => $heroes]);
         }
     }
@@ -76,12 +76,12 @@ class GameDefaults
         // Defaults are not a change: updated_at/updated_by stay empty until someone edits the record.
         Model::withoutTimestamps(function () use ($model, $keys, $values): void {
             if (! $this->reset) {
-                $model::firstOrCreate($keys, $values);
+                $model::query()->firstOrCreate($keys, $values);
 
                 return;
             }
 
-            $record = $model::firstOrNew($keys)->fill($values);
+            $record = $model::query()->firstOrNew($keys)->fill($values);
             $record->forceFill(['updated_at' => null]);
             $record->save();
         });

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,7 +19,9 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+
+    use Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -51,6 +54,9 @@ class User extends Authenticatable implements FilamentUser
         return ! $this->is_admin;
     }
 
+    /**
+     * @return HasMany<Save, $this>
+     */
     public function saves(): HasMany
     {
         return $this->hasMany(Save::class);

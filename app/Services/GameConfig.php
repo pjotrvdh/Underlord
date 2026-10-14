@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\Setting;
 use App\Models\Spell;
 use App\Models\Wave;
+use App\Support\GameData;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class GameConfig
 {
-    private const CACHE_KEY = 'underlord.game-config';
+    private const string CACHE_KEY = 'underlord.game-config';
 
     public static function forget(): void
     {
@@ -25,19 +26,19 @@ class GameConfig
     /** @return array<string, mixed> */
     public function toArray(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY, fn () => $this->build());
+        return Cache::rememberForever(self::CACHE_KEY, fn (): array => $this->build());
     }
 
     /** @return array<string, mixed> */
     private function build(): array
     {
         $game = [];
-        foreach (Setting::inConfigOrder()->get() as $setting) {
+        foreach (Setting::query()->inConfigOrder()->get() as $setting) {
             $game[$setting->group][$setting->name()] = $setting->value;
         }
 
         $creatures = ['creatures' => [], 'heroes' => []];
-        foreach (Creature::inConfigOrder()->get() as $c) {
+        foreach (Creature::query()->inConfigOrder()->get() as $c) {
             $row = [
                 'name' => $c->name, 'hp' => $c->hp, 'attack' => $c->attack,
                 'speed' => $c->speed, 'range' => $c->range, 'rate' => $c->rate, 'color' => $c->color,
@@ -54,24 +55,28 @@ class GameConfig
         $rooms = Room::all()->keyBy('key');
         $roomRows = [];
         foreach (Room::KEYS as $key) {
-            $r = $rooms[$key];
+            $r = $rooms->get($key);
+            if (! $r instanceof Room) {
+                continue;
+            }
+
             $roomRows[$key] = ['name' => $r->name, 'cost' => $r->cost, 'color' => $r->color, 'tip' => $r->tip];
         }
 
         $spells = [];
-        foreach (Spell::inConfigOrder()->get() as $s) {
+        foreach (Spell::query()->inConfigOrder()->get() as $s) {
             $spells[$s->key] = ['name' => $s->name, 'research' => $s->research, 'cost' => $s->cost] + ($s->params ?? []);
         }
 
-        // Assets are managed in the project (config/underlord.php), not in the database.
-        $assets = array_map(fn (array $files): array => array_map(fn (string $path): string => asset($path), $files), config('underlord.assets'));
+        // Assets are managed in the project (config/underlord/assets.php), not in the database.
+        $assets = array_map(static fn (array $files): array => array_map(asset(...), $files), GameData::assets());
 
         return [
             'game' => $game,
             'creatures' => $creatures,
             'rooms' => ['rooms' => $roomRows],
             'spells' => ['spells' => $spells],
-            'waves' => ['waves' => Wave::inConfigOrder()->pluck('heroes')->all()],
+            'waves' => ['waves' => Wave::query()->inConfigOrder()->pluck('heroes')->all()],
             'assets' => $assets,
         ];
     }

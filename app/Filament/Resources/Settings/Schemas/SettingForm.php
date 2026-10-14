@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Settings\Schemas;
 
 use App\Filament\Schemas\FormLayout;
+use App\Filament\Support\DefaultValue;
+use App\Models\Setting;
+use App\Support\GameData;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -15,12 +18,12 @@ class SettingForm
             ->components([
                 FormLayout::make(
                     main: [
-                        TextInput::make('value')->withDefault()
+                        DefaultValue::on(TextInput::make('value'))
                             ->label(__('resource.setting.fields.value'))
-                            ->helperText(fn ($record) => $record?->description())
+                            ->helperText(fn (?Setting $record): ?string => $record?->description())
                             ->required()
                             ->numeric()
-                            ->dehydrateStateUsing(fn ($state) => $state + 0),
+                            ->dehydrateStateUsing(GameData::number(...)),
                     ],
                     aside: [
                         TextEntry::make('group')->label(__('resource.setting.fields.group'))->badge(),

@@ -18,18 +18,18 @@ class CheatsVisibilityTest extends TestCase
 
     public function test_guests_do_not_get_the_cheats_panel(): void
     {
-        $this->get('/')->assertOk()->assertDontSee('id="bCheat"', false)->assertSee('"isAdmin":false', false);
+        $this->get('/')->assertOk()->assertDontSeeHtml('id="bCheat"')->assertSeeHtml('"isAdmin":false');
     }
 
     public function test_players_who_are_not_admin_do_not_get_the_cheats_panel(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => false]))
-            ->get('/')->assertOk()->assertDontSee('id="bCheat"', false);
+            ->get('/')->assertOk()->assertDontSeeHtml('id="bCheat"');
     }
 
     public function test_admins_get_the_cheats_panel(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]))
-            ->get('/')->assertOk()->assertSee('id="bCheat"', false)->assertSee('"isAdmin":true', false);
+            ->get('/')->assertOk()->assertSeeHtml('id="bCheat"')->assertSeeHtml('"isAdmin":true');
     }
 }

@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Default spells. research = points needed to unlock, cost = gold per cast, params = the
  * spell's effect (Lightning: damage and radius; Heal: radius; Call to Arms: duration).
  * Create Imp's cost comes from the imp settings (baseCost, perImp). Keys are fixed.
  */
-
 return [
     'imp' => [
         'name' => 'Create Imp',

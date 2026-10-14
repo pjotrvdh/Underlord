@@ -17,12 +17,12 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($request->only(['email', 'password']), $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'That email and password do not match an account.'])->onlyInput('email');
         }
 
@@ -37,6 +37,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('game');
+        return to_route('game');
     }
 }

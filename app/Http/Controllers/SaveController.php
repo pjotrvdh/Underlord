@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -14,7 +15,7 @@ class SaveController extends Controller
 {
     public function show(Request $request): JsonResponse|Response
     {
-        $save = $request->user()->saves()->where('slot', 'slot1')->first();
+        $save = $this->player($request)->saves()->where('slot', 'slot1')->first();
 
         return $save
             ? response()->json(['data' => $save->data, 'version' => $save->version, 'wave' => $save->wave, 'savedAt' => $save->updated_at])
@@ -23,14 +24,27 @@ class SaveController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $valid = $request->validate([
+        $request->validate([
             'data' => ['required', 'string', 'max:524288', 'json'],
             'version' => ['required', 'integer', 'min:1'],
             'wave' => ['required', 'integer', 'min:0'],
         ]);
 
-        $save = $request->user()->saves()->updateOrCreate(['slot' => 'slot1'], $valid);
+        $save = $this->player($request)->saves()->updateOrCreate(['slot' => 'slot1'], [
+            'data' => $request->string('data')->toString(),
+            'version' => $request->integer('version'),
+            'wave' => $request->integer('wave'),
+        ]);
 
         return response()->json(['savedAt' => $save->updated_at]);
+    }
+
+    /** The routes sit behind the auth middleware, so there is always a player. */
+    private function player(Request $request): User
+    {
+        $user = $request->user();
+        abort_unless($user instanceof User, 401);
+
+        return $user;
     }
 }

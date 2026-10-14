@@ -5,12 +5,23 @@ namespace App\Models;
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use App\Models\Contracts\HasDefaults;
+use App\Support\GameData;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Setting extends Model
+/**
+ * @property float|int $value
+ */
+#[Fillable(['key', 'group', 'value'])]
+#[WithoutIncrementing]
+class Setting extends Model implements HasDefaults
 {
-    use ClearsGameConfig, HasConfigDefaults, TracksUpdatedBy;
+    use ClearsGameConfig;
+    use HasConfigDefaults;
+    use TracksUpdatedBy;
 
     /** Game data comes from config/underlord; only the last change in the admin panel is kept. */
     public const CREATED_AT = null;
@@ -20,10 +31,6 @@ class Setting extends Model
 
     protected $keyType = 'string';
 
-    public $incrementing = false;
-
-    protected $fillable = ['key', 'group', 'value'];
-
     protected function casts(): array
     {
         return ['value' => 'json'];
@@ -31,7 +38,7 @@ class Setting extends Model
 
     public function configDefaults(): ?array
     {
-        $default = config("underlord.settings.{$this->key}");
+        $default = GameData::settings()[$this->group][$this->name()] ?? null;
 
         return $default === null ? null : ['value' => $default];
     }
@@ -39,7 +46,7 @@ class Setting extends Model
     public static function configOrder(): array
     {
         $order = [];
-        foreach (config('underlord.settings') as $group => $values) {
+        foreach (GameData::settings() as $group => $values) {
             foreach (array_keys($values) as $key) {
                 $order[] = ['key' => "{$group}.{$key}"];
             }
@@ -52,7 +59,7 @@ class Setting extends Model
     {
         $line = "resource.setting.descriptions.{$this->key}";
 
-        return trans()->has($line) ? __($line) : null;
+        return trans()->has($line) ? GameData::trans($line) : null;
     }
 
     /** The setting's name within its group: economy.startGold → startGold. */

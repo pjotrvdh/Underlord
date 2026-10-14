@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('waves', function (Blueprint $table) {
+        Schema::create('waves', function (Blueprint $table): void {
             $table->unsignedInteger('number')->primary();
             $table->json('heroes'); // {"dwarf": 2, "archer": 1}
             // Game data comes from config/underlord; only changes made in the admin panel are tracked.

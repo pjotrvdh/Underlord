@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Rooms\Schemas;
 
 use App\Filament\Schemas\FormLayout;
+use App\Filament\Support\DefaultValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -16,10 +17,10 @@ class RoomForm
             ->components([
                 FormLayout::make(
                     main: [
-                        TextInput::make('name')->withDefault()->label(__('resource.room.fields.name'))->required()
+                        DefaultValue::on(TextInput::make('name'))->label(__('resource.room.fields.name'))->required()
                             ->columnSpanFull(),
-                        TextInput::make('cost')->withDefault()->label(__('resource.room.fields.cost'))->required()->numeric()->minValue(0)->suffix('gold per tile'),
-                        TextInput::make('tip')->withDefault()->label(__('resource.room.fields.tip'))->required()->columnSpanFull(),
+                        DefaultValue::on(TextInput::make('cost'))->label(__('resource.room.fields.cost'))->required()->numeric()->minValue(0)->suffix('gold per tile'),
+                        DefaultValue::on(TextInput::make('tip'))->label(__('resource.room.fields.tip'))->required()->columnSpanFull(),
                     ],
                     aside: [
                         ColorEntry::make('color')

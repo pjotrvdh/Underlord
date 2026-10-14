@@ -3,7 +3,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -19,14 +22,18 @@
         "swisnl/filament-backgrounds": "^2.0"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.6",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.12",
         "laravel/boost": "^2.10",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpunit/phpunit": "^12.5.12",
+        "rector/rector": "^2.7",
         "swisnl/laravel-boost-extras": "^0.1"
     },
     "autoload": {
@@ -55,7 +62,8 @@
             "@php artisan dev"
         ],
         "test": [
-            "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan optimize:clear --quiet",
+            "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
         "post-autoload-dump": [
@@ -64,7 +72,8 @@
             "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "if [ \"$COMPOSER_DEV_MODE\" = \"1\" ] ; then php artisan boost:update --ansi ; fi",
+            "@publish-assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -76,6 +85,27 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "analyse": [
+            "@php artisan optimize:clear --quiet",
+            "vendor/bin/phpstan analyse --ansi"
+        ],
+        "format": [
+            "vendor/bin/rector process",
+            "vendor/bin/pint --parallel"
+        ],
+        "format-check": [
+            "@php artisan optimize:clear --quiet",
+            "vendor/bin/rector process --dry-run",
+            "vendor/bin/pint --parallel --bail"
+        ],
+        "post-install-cmd": [
+            "if [ \"$COMPOSER_DEV_MODE\" = \"1\" ] ; then php artisan boost:update --ansi ; fi",
+            "@publish-assets"
+        ],
+        "publish-assets": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan filament:assets"
         ]
     },
     "extra": {
@@ -90,6 +120,13 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "policy": {
+            "abandoned": {
+                "ignore": {
+                    "symplify/rule-doc-generator-contracts": "Transitive dev dependency of driftingly/rector-laravel 2.6.2; no replacement is currently available."
+                }
+            }
         }
     },
     "minimum-stability": "stable",

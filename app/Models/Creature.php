@@ -5,12 +5,26 @@ namespace App\Models;
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use App\Models\Contracts\HasDefaults;
+use App\Support\GameData;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
-class Creature extends Model
+/**
+ * @property array<string, int>|null $attract
+ */
+#[Fillable([
+    'key', 'side', 'name', 'hp', 'attack', 'speed', 'range', 'rate', 'wage', 'vision',
+    'pool', 'attract', 'bounty', 'dig', 'big',
+])]
+#[WithoutIncrementing]
+class Creature extends Model implements HasDefaults
 {
-    use ClearsGameConfig, HasConfigDefaults, TracksUpdatedBy;
+    use ClearsGameConfig;
+    use HasConfigDefaults;
+    use TracksUpdatedBy;
 
     /** Game data comes from config/underlord; only the last change in the admin panel is kept. */
     public const CREATED_AT = null;
@@ -20,16 +34,9 @@ class Creature extends Model
 
     protected $keyType = 'string';
 
-    public $incrementing = false;
-
     public const SIDE_CREATURE = 'creature';
 
     public const SIDE_HERO = 'hero';
-
-    protected $fillable = [
-        'key', 'side', 'name', 'hp', 'attack', 'speed', 'range', 'rate', 'wage', 'vision',
-        'pool', 'attract', 'bounty', 'dig', 'big',
-    ];
 
     protected function casts(): array
     {
@@ -45,20 +52,20 @@ class Creature extends Model
 
     public function configDefaults(): ?array
     {
-        return config("underlord.creatures.{$this->key}");
+        return GameData::creatures()[$this->key] ?? null;
     }
 
     public static function configOrder(): array
     {
-        return array_map(fn (string $key): array => ['key' => $key], array_keys(config('underlord.creatures')));
+        return array_map(static fn (string $key): array => ['key' => $key], array_keys(GameData::creatures()));
     }
 
     /** URL of the creature's SVG (config/underlord/assets.php), or null when it has none. */
     public function assetUrl(): ?string
     {
-        $path = config("underlord.assets.units.{$this->key}");
+        $path = GameData::assets()['units'][$this->key] ?? null;
 
-        return $path ? asset($path) : null;
+        return $path !== null ? asset($path) : null;
     }
 
     /**
@@ -68,6 +75,6 @@ class Creature extends Model
      */
     protected function color(): Attribute
     {
-        return Attribute::get(fn (): ?string => config("underlord.creatures.{$this->key}.color"));
+        return Attribute::get(fn (): ?string => GameData::creatures()[$this->key]['color'] ?? null);
     }
 }

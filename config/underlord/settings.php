@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Default game settings. Each value is stored in the database the first time it is needed
  * (GameDefaults) and can then be changed in the admin panel; this file stays the default.
  * Descriptions for the admin panel: lang/en/resource.php (setting.descriptions).
  * Times are in seconds, gold in gold pieces, distances in tiles.
  */
-
 return [
     'economy' => [
         'startGold' => 1500,

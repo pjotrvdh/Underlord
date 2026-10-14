@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * SVG graphics the game draws, as paths under public/. Managed in the project, not in the
  * admin panel: swap a file or a path to restyle something; remove an entry to fall back to
  * the built-in drawing. Sizes and orientation: public/assets/README.md.
  */
-
 return [
     'units' => [
         'imp' => 'assets/units/imp.svg',

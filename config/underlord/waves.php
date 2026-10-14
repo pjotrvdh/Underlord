@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Default hero invasions, in order: hero key => how many come.
  */
-
 return [
     [
         'dwarf' => 2,

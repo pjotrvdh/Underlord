@@ -1,25 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use App\Models\Contracts\HasDefaults;
+use App\Support\GameData;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Model;
 
-class Wave extends Model
+/**
+ * @property array<string, int> $heroes
+ */
+#[Fillable(['number', 'heroes'])]
+#[WithoutIncrementing]
+class Wave extends Model implements HasDefaults
 {
-    use ClearsGameConfig, HasConfigDefaults, TracksUpdatedBy;
+    use ClearsGameConfig;
+    use HasConfigDefaults;
+    use TracksUpdatedBy;
 
     /** Game data comes from config/underlord; only the last change in the admin panel is kept. */
     public const CREATED_AT = null;
 
     /** Waves are identified by their number. */
     protected $primaryKey = 'number';
-
-    public $incrementing = false;
-
-    protected $fillable = ['number', 'heroes'];
 
     protected function casts(): array
     {
@@ -28,13 +37,13 @@ class Wave extends Model
 
     public function configDefaults(): ?array
     {
-        $heroes = config('underlord.waves')[$this->number - 1] ?? null;
+        $heroes = GameData::waves()[$this->number - 1] ?? null;
 
         return $heroes === null ? null : ['number' => $this->number, 'heroes' => $heroes];
     }
 
     public static function configOrder(): array
     {
-        return array_map(fn (int $i): array => ['number' => $i + 1], array_keys(config('underlord.waves')));
+        return array_map(static fn (int $i): array => ['number' => $i + 1], array_keys(GameData::waves()));
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table): void {
             $table->string('key')->primary(); // the setting's handle, e.g. economy.startGold
             $table->string('group');
             $table->json('value');

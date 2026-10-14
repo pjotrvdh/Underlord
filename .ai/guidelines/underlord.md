@@ -17,6 +17,14 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 - **Assets** (SVGs) and the **colours** of creatures and rooms are managed in the project, not in the database: `config/underlord/assets.php`, `public/assets/` and the `color` entries in the config. The admin panel shows them read-only.
 - `App\Services\GameConfig` builds and caches the object the game reads. Model events clear that cache.
 
+## Checks
+
+These are the same checks CI runs (`.github/workflows`, modelled on wherermeorders):
+
+- `ddev composer test`: the test suite, on in-memory SQLite.
+- `ddev composer analyse`: PHPStan/Larastan at the max level.
+- `ddev composer format-check`: Rector (dry run) and Pint. `ddev composer format` applies both.
+
 ## Git
 
 - Commit messages are a single short subject line, with no body and no co-author or attribution trailer.

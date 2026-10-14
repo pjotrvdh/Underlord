@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Default creatures and heroes, in the order the game and the admin panel list them.
  *   side     creature (comes through your portal) or hero (invades)
@@ -9,7 +11,6 @@
  *   bounty   gold for killing it; dig = seconds per hit when tunnelling; big = drawn larger
  * Keys are fixed: waves and config/underlord/assets.php refer to them.
  */
-
 return [
     'imp' => [
         'side' => 'creature',

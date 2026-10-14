@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Services\GameDefaults;
@@ -21,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
         // Records edited in the admin panel are left alone.
         Event::listen(function (MigrationsEnded $event): void {
             if ($event->method === 'up' && empty($event->options['pretend']) && Schema::hasTable('settings')) {
-                app(GameDefaults::class)->sync();
+                resolve(GameDefaults::class)->sync();
             }
         });
     }

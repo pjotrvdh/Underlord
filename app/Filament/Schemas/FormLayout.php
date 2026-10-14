@@ -44,7 +44,7 @@ class FormLayout
                                 Timestamp::make('updated_at'),
                                 TextEntry::make('updatedBy.name')
                                     ->label(__('resource.fields.updated_by'))
-                                    ->visible(fn (?Model $record): bool => $record !== null && method_exists($record, 'updatedBy') && $record->updated_by !== null),
+                                    ->visible(fn (?Model $record): bool => $record instanceof Model && method_exists($record, 'updatedBy') && $record->getAttribute('updated_by') !== null),
                             ])
                             ->hidden(fn (?Model $record): bool => ! $record instanceof Model),
                     ])

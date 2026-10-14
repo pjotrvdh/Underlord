@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use App\Enums\NavigationGroup;
-use App\Filament\Support\DefaultValue;
 use App\Models\User;
 use Awcodes\Gravatar\GravatarPlugin;
 use Awcodes\Gravatar\GravatarProvider;
@@ -125,7 +124,6 @@ class AdminPanelProvider extends PanelProvider
     public function boot(): void
     {
         FilamentColor::register(Color::all());
-        DefaultValue::register();
 
         Select::configureUsing(static fn (Select $select): Select => $select->native(false));
         SelectFilter::configureUsing(static fn (SelectFilter $selectFilter): SelectFilter => $selectFilter->native(false));

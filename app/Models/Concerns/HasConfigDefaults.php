@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Game data whose defaults live in config/underlord/*.php. The config decides the order the
@@ -29,8 +30,29 @@ trait HasConfigDefaults
         return data_get($this->configDefaults(), $field);
     }
 
-    /** @param  Builder<static>  $query */
-    public function scopeInConfigOrder(Builder $query): void
+    /**
+     * Sort a query like the config, for Filament's modifyQueryUsing(Model::orderByConfig(...)).
+     *
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     */
+    public static function orderByConfig(Builder $query): Builder
+    {
+        self::applyConfigOrder($query);
+
+        return $query;
+    }
+
+    /** @param  Builder<covariant Model>  $query */
+    protected function scopeInConfigOrder(Builder $query): void
+    {
+        self::applyConfigOrder($query);
+    }
+
+    /** @param  Builder<covariant Model>  $query */
+    private static function applyConfigOrder(Builder $query): void
     {
         $cases = [];
         $bindings = [];
@@ -39,8 +61,9 @@ trait HasConfigDefaults
             array_push($bindings, ...array_values($conditions));
         }
 
-        if ($cases) {
-            $query->orderByRaw('CASE '.implode(' ', $cases).' ELSE '.count($cases).' END', $bindings);
+        if ($cases !== []) {
+            // Built from config keys and the grammar's column quoting; the values are bound.
+            $query->orderByRaw('CASE '.implode(' ', $cases).' ELSE '.count($cases).' END', $bindings); // @phpstan-ignore argument.type
         }
     }
 }

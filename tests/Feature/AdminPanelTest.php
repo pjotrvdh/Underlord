@@ -87,7 +87,7 @@ class AdminPanelTest extends TestCase
 
     public function test_the_game_page_renders_for_guests(): void
     {
-        $this->get('/')->assertOk()->assertSee('window.UNDERLORD', false);
+        $this->get('/')->assertOk()->assertSeeHtml('window.UNDERLORD');
     }
 
     public function test_game_data_urls_use_handles(): void
@@ -103,16 +103,16 @@ class AdminPanelTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]));
 
-        $this->get('/admin/creatures')->assertOk()->assertSee('assets/units/troll.svg', false);
-        $this->get('/admin/creatures/troll/edit')->assertOk()->assertSee('assets/units/troll.svg', false);
+        $this->get('/admin/creatures')->assertOk()->assertSeeHtml('assets/units/troll.svg');
+        $this->get('/admin/creatures/troll/edit')->assertOk()->assertSeeHtml('assets/units/troll.svg');
     }
 
     public function test_colours_come_from_config_and_are_not_editable(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]));
 
-        $this->assertSame(config('underlord.creatures.troll.color'), Creature::find('troll')->color);
-        $this->assertSame(config('underlord.rooms.lair.color'), Room::find('lair')->color);
+        $this->assertSame(config('underlord.creatures.troll.color'), Creature::query()->find('troll')->color);
+        $this->assertSame(config('underlord.rooms.lair.color'), Room::query()->find('lair')->color);
 
         Livewire::test(EditCreature::class, ['record' => 'troll'])
             ->assertFormFieldDoesNotExist('color');

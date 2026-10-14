@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Waves\Schemas;
 
 use App\Filament\Schemas\FormLayout;
+use App\Filament\Support\DefaultValue;
 use App\Models\Creature;
+use App\Support\GameData;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -19,18 +21,18 @@ class WaveForm
                 FormLayout::make(
                     main: [
                         // Stored as {"dwarf": 2, ...}; edited as a list of hero + count rows.
-                        Repeater::make('heroes')->withDefault()
+                        DefaultValue::on(Repeater::make('heroes'))
                             ->label(__('resource.wave.fields.heroes'))
                             ->columns(2)
                             ->minItems(1)
                             ->columnSpanFull()
-                            ->formatStateUsing(fn ($state) => collect($state ?? [])->map(fn ($n, $k) => ['hero' => $k, 'count' => $n])->values()->all())
-                            ->dehydrateStateUsing(fn ($state) => collect($state ?? [])->mapWithKeys(fn ($row) => [$row['hero'] => (int) $row['count']])->all())
+                            ->formatStateUsing(static fn (mixed $state): array => collect(is_array($state) ? $state : [])->map(static fn (mixed $n, int|string $k): array => ['hero' => $k, 'count' => $n])->values()->all())
+                            ->dehydrateStateUsing(GameData::heroRows(...))
                             ->schema([
                                 Select::make('hero')
                                     ->label(__('resource.wave.fields.hero'))
                                     ->required()
-                                    ->options(fn () => Creature::where('side', Creature::SIDE_HERO)->inConfigOrder()->pluck('name', 'key')),
+                                    ->options(fn () => Creature::query()->where('side', Creature::SIDE_HERO)->inConfigOrder()->pluck('name', 'key')),
                                 TextInput::make('count')
                                     ->label(__('resource.wave.fields.count'))
                                     ->required()->numeric()->minValue(1)->default(1),

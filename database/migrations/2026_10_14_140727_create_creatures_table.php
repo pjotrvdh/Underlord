@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('creatures', function (Blueprint $table) {
+        Schema::create('creatures', function (Blueprint $table): void {
             $table->string('key')->primary(); // the handle used in config/underlord and by the game
             $table->string('side'); // 'creature' (yours) or 'hero'
             $table->string('name');

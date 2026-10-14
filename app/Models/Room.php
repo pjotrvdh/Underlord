@@ -5,12 +5,20 @@ namespace App\Models;
 use App\Models\Concerns\ClearsGameConfig;
 use App\Models\Concerns\HasConfigDefaults;
 use App\Models\Concerns\TracksUpdatedBy;
+use App\Models\Contracts\HasDefaults;
+use App\Support\GameData;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
-class Room extends Model
+#[Fillable(['key', 'name', 'cost', 'tip'])]
+#[WithoutIncrementing]
+class Room extends Model implements HasDefaults
 {
-    use ClearsGameConfig, HasConfigDefaults, TracksUpdatedBy;
+    use ClearsGameConfig;
+    use HasConfigDefaults;
+    use TracksUpdatedBy;
 
     /** Game data comes from config/underlord; only the last change in the admin panel is kept. */
     public const CREATED_AT = null;
@@ -20,21 +28,17 @@ class Room extends Model
 
     protected $keyType = 'string';
 
-    public $incrementing = false;
-
     /** The game logic depends on these ids, in this order (room codes 1..5). */
     public const KEYS = ['treasury', 'lair', 'hatchery', 'training', 'library'];
 
-    protected $fillable = ['key', 'name', 'cost', 'tip'];
-
     public function configDefaults(): ?array
     {
-        return config("underlord.rooms.{$this->key}");
+        return GameData::rooms()[$this->key] ?? null;
     }
 
     public static function configOrder(): array
     {
-        return array_map(fn (string $key): array => ['key' => $key], array_keys(config('underlord.rooms')));
+        return array_map(static fn (string $key): array => ['key' => $key], array_keys(GameData::rooms()));
     }
 
     /**
@@ -44,6 +48,6 @@ class Room extends Model
      */
     protected function color(): Attribute
     {
-        return Attribute::get(fn (): ?string => config("underlord.rooms.{$this->key}.color"));
+        return Attribute::get(fn (): ?string => GameData::rooms()[$this->key]['color'] ?? null);
     }
 }
