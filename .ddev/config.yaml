@@ -13,6 +13,7 @@ use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
 nodejs_version: "22"
+project_tld: ddev.site # DDEV's default, also when the global config sets another TLD
 corepack_enable: false
 
 # Key features of DDEV's config.yaml:

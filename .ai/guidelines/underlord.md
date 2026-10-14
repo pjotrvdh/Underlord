@@ -4,7 +4,7 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 
 ## Stack
 
-- Laravel 13, PHP 8.4, MySQL 8, Filament 5 (admin panel at `/admin`) and Vite, running on DDEV at https://underlord.swisdev.nl.
+- Laravel 13, PHP 8.4, MySQL 8, Filament 5 (admin panel at `/admin`) and Vite, running on DDEV at https://underlord.ddev.site.
 - The game client is `resources/js/underlord.js` plus `resources/css/underlord.css`, rendered by `resources/views/game.blade.php`. Laravel puts the game config into `window.UNDERLORD`. After a frontend change, run `ddev exec npm run build`.
 
 ## Game data
