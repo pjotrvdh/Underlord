@@ -1,7 +1,0 @@
-# Spells. research = points needed to unlock, cost = gold per cast.
-# Create Imp's cost is set in game.yml (imp.baseCost / imp.perImp).
-spells:
-  imp:   {name: Create Imp, research: 0}
-  bolt:  {name: Lightning, research: 150, cost: 250, damage: 90, radius: 1.6}
-  heal:  {name: Heal, research: 400, cost: 200, radius: 2.5}
-  rally: {name: Call to Arms, research: 800, cost: 300, duration: 20}

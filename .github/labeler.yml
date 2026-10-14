@@ -1,0 +1,8 @@
+shift:
+  - head-branch: ['^shift-']
+
+feature:
+  - head-branch: ['^feature/', '^epic/']
+
+bug:
+  - head-branch: ['^bugfix/', '^hotfix/']
