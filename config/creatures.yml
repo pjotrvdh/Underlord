@@ -1,0 +1,25 @@
+# Creatures and heroes.
+#   name     shown in the game
+#   glyph    letter used when an SVG asset is missing
+#   hp, attack, speed (tiles/s), range (tiles; 1 = melee), rate (seconds between attacks)
+#   wage     gold per payday (your creatures)
+#   vision   sight radius in tiles (your creatures)
+#   pool     how many can come through portals on one map
+#   attract  minimum room sizes in tiles before it comes; every creature also needs a free Lair bed
+#   bounty   gold for killing it (heroes)
+#   dig      seconds per hit when tunnelling (heroes)
+#   color    used for the fallback drawing and the Portal panel
+
+creatures:
+  imp:      {name: Imp, glyph: "", hp: 40, attack: 3, speed: 3.0, range: 1, rate: 1, wage: 0, color: "#c8552f"}
+  goblin:   {name: Goblin, glyph: G, hp: 90, attack: 9, speed: 2.4, range: 1, rate: 0.9, wage: 40, vision: 5, pool: 8, attract: {}, color: "#6f9a35"}
+  warlock:  {name: Warlock, glyph: W, hp: 70, attack: 13, speed: 2.0, range: 4, rate: 1.3, wage: 70, vision: 5, pool: 5, attract: {library: 9}, color: "#7c4dd8"}
+  troll:    {name: Troll, glyph: T, hp: 170, attack: 13, speed: 1.7, range: 1, rate: 1.1, wage: 60, vision: 5, pool: 5, attract: {lair: 9, hatchery: 9}, color: "#8a7350"}
+  mistress: {name: Dark Mistress, glyph: M, hp: 140, attack: 18, speed: 2.7, range: 1, rate: 0.8, wage: 110, vision: 5, pool: 3, attract: {training: 9}, color: "#c43d7e"}
+
+heroes:
+  dwarf:  {name: Dwarf, glyph: d, hp: 80, attack: 8, speed: 2.0, range: 1, rate: 1, bounty: 60, dig: 0.3, color: "#b9824a"}
+  archer: {name: Archer, glyph: b, hp: 60, attack: 9, speed: 2.2, range: 4.5, rate: 1.2, bounty: 70, dig: 0.9, color: "#3f8f6b"}
+  wizard: {name: Wizard, glyph: w, hp: 70, attack: 15, speed: 1.9, range: 4, rate: 1.5, bounty: 100, dig: 0.9, color: "#3a6fd8"}
+  knight: {name: Knight, glyph: K, hp: 230, attack: 18, speed: 2.0, range: 1, rate: 1.1, bounty: 200, dig: 0.8, color: "#9aa6b8"}
+  lord:   {name: Lord of the Land, glyph: L, hp: 1000, attack: 32, speed: 1.8, range: 1, rate: 1.1, bounty: 1000, dig: 0.6, big: true, color: "#e2c46a"}

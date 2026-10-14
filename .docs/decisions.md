@@ -26,6 +26,9 @@ The owner (pjotr, Dutch-speaking) asked for these things, in this order. Keep th
 12. **A cheats menu** with +500 gold and more.
 13. **Imps reinforce walls,** as in DK: idle imps fortify earth that borders your territory. Heroes can still break through, but slowly, while dwarves (0.3 s per hit) go through much faster. You can still dig your own walls (8 hits).
 
+14. **Separate SVG assets** in `assets/`, so the owner can restyle units and tiles and raise the resolution. Every asset keeps a procedural fallback.
+15. **YAML config files** for settings like start gold and for the creature definitions. YAML needs a parser, and a CDN library would not work offline from disk, so the game has its own small subset parser. The files are embedded in the HTML (synced by a tool), so the single file still works on its own and as an artifact.
+
 ## Our own balancing decisions
 
 These came out of the headless simulation:
@@ -39,4 +42,4 @@ These came out of the headless simulation:
 ## Known open points
 
 - **Difficulty setting** (planned): it should scale the `ECON` values, plus the hero waves.
-- There is **no real browser test yet:** rendering, input, zoom and fog have not been checked visually by an agent.
+- **Browser testing is limited to one visual check,** done after the SVG work: tiles, Heart, portal, chests, walls and unit sprites render correctly. Input and zoom have not been exercised in depth.

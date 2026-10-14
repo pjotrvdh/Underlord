@@ -1,0 +1,32 @@
+# Which SVG file the game draws for each thing. Paths are relative to underlord.html.
+# Swap a path to restyle something; delete a line to fall back to the built-in drawing.
+units:
+  imp: assets/units/imp.svg
+  goblin: assets/units/goblin.svg
+  warlock: assets/units/warlock.svg
+  troll: assets/units/troll.svg
+  mistress: assets/units/mistress.svg
+  dwarf: assets/units/dwarf.svg
+  archer: assets/units/archer.svg
+  wizard: assets/units/wizard.svg
+  knight: assets/units/knight.svg
+  lord: assets/units/lord.svg
+tiles:
+  earth: assets/tiles/earth.svg
+  gold: assets/tiles/gold.svg
+  gem: assets/tiles/gem.svg
+  rock: assets/tiles/rock.svg
+  floor: assets/tiles/floor.svg
+  claimed: assets/tiles/claimed.svg
+  wall: assets/tiles/wall.svg
+props:
+  heart: assets/props/heart.svg
+  portal: assets/props/portal.svg
+  portal-unclaimed: assets/props/portal-unclaimed.svg
+  gate: assets/props/gate.svg
+  chest: assets/props/chest.svg
+  treasury-pile: assets/props/treasury-pile.svg
+  lair-nest: assets/props/lair-nest.svg
+  hatchery-chicken: assets/props/hatchery-chicken.svg
+  training-dummy: assets/props/training-dummy.svg
+  library-shelf: assets/props/library-shelf.svg

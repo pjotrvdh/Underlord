@@ -2,13 +2,30 @@
 
 A browser game in the spirit of *Dungeon Keeper*. You are an evil overlord deep underground: dig into a cloud-covered map, claim territory, build rooms, attract creatures through portals and defend your Dungeon Heart against six invasions from the surface.
 
-The whole game is one self-contained file, [`underlord.html`](underlord.html). It has no build step, no dependencies and no server.
+The game is [`underlord.html`](underlord.html), with its settings in [`config/`](config) (YAML) and its graphics in [`assets/`](assets) (SVG). It has no build step and no dependencies.
 
 **Play it:** https://claude.ai/artifact/KpshEgP4ECCxr4pLyG13Rr (private artifact; saves go to your Claude account)
 
 ## Running locally
 
-Open `underlord.html` in a browser. When it runs as a local file, saves go to the browser's `localStorage` and not to an account.
+You can open `underlord.html` straight from disk. In that case it uses the copy of the settings embedded in the file, and saves go to the browser's `localStorage`. To use your edited `config/*.yml` files directly, serve the folder instead:
+
+```bash
+python3 -m http.server 8765
+```
+
+Then open http://localhost:8765/underlord.html.
+
+## Modding
+
+- **Settings** live in [`config/`](config):
+  - `game.yml`: start gold, storage, wages, timings, Heart, portals and waves
+  - `creatures.yml`: every creature and hero, including their stats, wages, pool and room requirements
+  - `rooms.yml`, `spells.yml`, `waves.yml`
+  - `assets.yml`: which SVG file is used for what
+
+  After editing a file, run `node tools/sync-config.cjs` so the copy inside `underlord.html` matches.
+- **Graphics** are SVGs in [`assets/`](assets). See [`assets/README.md`](assets/README.md) for the size and orientation conventions.
 
 ## How to play
 

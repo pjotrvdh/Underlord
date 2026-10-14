@@ -4,7 +4,9 @@
 
 | Section | Key functions |
 |---|---|
-| constants | `W H N`, tile codes (`ROCK`…`LAVA`), room codes (`TREAS`…`LIB`), `ROOMS`, `KINDS`, `WAVES`, `SPELLS`, `ATTRACT`, `PORTAL_LIMIT` |
+| constants | `W H N`, tile codes (`ROCK`…`WALL`), room codes (`TREAS`…`LIB`), `ROOM_IDS` |
+| config | `parseYAML`, `embeddedConfig`, `fetchConfig`, `applyConfig`. This section fills `CFG`, `ECON`, `KINDS`, `ROOMS`, `SPELLS`, `WAVES`, `ATTRACT`, `PORTAL_LIMIT`, `HEART_CAP`, `TREAS_CAP`, `WALL_HP` and `ASSETS` from the YAML |
+| assets | `loadAssets`, `sprite(key, w, h)` (a raster cache per size), `spr(key, x, y, w, h, flip)`, which returns false when the asset is missing so the caller can draw its procedural fallback |
 | small helpers | `ix tx ty inb hash ti walk transp diggable nb adjHeart cap ownPortal anyPortal` |
 | pathfinding | `bfs(start, goalFn, k, passFn, maxLen)` picks randomly among the first `k` matches; `dijkstra` is for heroes and treats earth and gold as passable at a cost |
 | map | `genMap()`, `newGame()` |
@@ -16,6 +18,15 @@
 | camera | `setWorld`, `clampCam`, `zoomAt`, `centerOn` (these sit between the drawing helpers) |
 | input | `affects`, `toolValid`, `entAt`, `slapAt`, `build`, `sell`, `applyRect`, `cast`, pointer, wheel and key handlers, `updateTip` |
 | interface | `CHEATS` (cheats panel), `toggleCheats`, `TOOLDEFS` (builds the toolbox buttons), `setTool`, `ui()` (stats, info box, Portal panel), `setSpeed`, `resize`, `frame` |
+
+## Config and assets
+
+- **Boot order:** `applyConfig(embeddedConfig())` runs synchronously, then `buildTools()`, then `newGame()`. After that, `fetchConfig()` tries `config/*.yml` over http(s). If it gets them, it runs `applyConfig` again, rebuilds the tools and calls `newGame()`, but only while no game is running yet. When the page is opened from `file:`, it skips the fetch.
+- **Mapping YAML to code:**
+  - Creatures map to `KINDS[k]` with the fields `n, g, hp, atk, spd, range, rate, wage, col, side, bounty, dig, big, vision, pool, attract`.
+  - `attract` (for example `{library: 9}`) becomes `ATTRACT[k].ok()` and a readable `need` text.
+  - Rooms are keyed by `ROOM_IDS` order, codes 1 to 5.
+- **Sprites:** an SVG `Image` is drawn into a cached canvas at `size × DPR` and then blitted. The cache is cleared when it grows past 800 entries or when an asset loads. Tiles snap to whole pixels and overlap by half a pixel, which avoids seams.
 
 ## State
 
@@ -83,4 +94,6 @@ Units are removed by setting `dead = true`; `update()` filters them out. Held un
 
 ## Testing
 
-`tools/sim.cjs` pulls the script out of `underlord.html`. It stubs `document` and the canvas with no-op proxies and makes the internals available by rewriting the startup line. It then runs `update()` directly. Because it imports nothing from the game, it breaks only if that startup line changes.
+`tools/sync-config.cjs [--check]` copies `config/*.yml` into the embedded blocks, or with `--check` verifies they match.
+
+`tools/sim.cjs` pulls the script out of `underlord.html`. It stubs `document` and the canvas with no-op proxies and makes the internals available by rewriting the startup line. It serves the embedded YAML through the `getElementById` stub and stubs `Image`, so no assets load and the procedural fallbacks are used. It then runs `update()` directly. Because it imports nothing from the game, it breaks only if that startup line changes.

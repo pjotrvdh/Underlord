@@ -1,0 +1,38 @@
+# General game settings. Times are in seconds, gold in gold pieces.
+# Edit, then run `node tools/sync-config.cjs` so the copy inside underlord.html matches.
+
+economy:
+  startGold: 1500
+  heartCap: 1500        # gold the Dungeon Heart can store
+  treasCap: 500         # extra storage per Treasury tile
+  seamGold: 300         # gold in each gold-seam tile
+  goldVeins: 13         # gold veins per map
+  payInterval: 180      # seconds between paydays
+  wageMul: 1            # multiplier on every creature wage
+  trainCost: 1.5        # gold per second per creature in the Training Room
+  bountyMul: 1          # multiplier on hero bounties
+
+imp:
+  baseCost: 100         # Create Imp costs baseCost + perImp x current imps
+  perImp: 25
+  startCount: 4
+  vision: 4
+
+heart:
+  hp: 2500
+  zapDamage: 14         # the Heart shoots heroes that come close
+  zapInterval: 0.8
+  zapRange: 2.9
+
+portal:
+  firstArrival: 6       # seconds after the first portal is claimed
+  interval: 20          # seconds between arrivals
+  creatureLimit: 15
+
+waves:
+  first: 300            # seconds until the first invasion
+  interval: 165         # seconds between invasions
+  heroScalePerWave: 0.12
+
+walls:
+  hp: 8                 # hits to dig through a reinforced wall

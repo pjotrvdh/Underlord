@@ -1,6 +1,6 @@
 # Game design
 
-Every mechanic and number below comes from `underlord.html`. When you change a number in the code, change it here too.
+Most numbers below come from `config/*.yml`, and the rest from `underlord.html`. When you change one, change it here too.
 
 ## World
 

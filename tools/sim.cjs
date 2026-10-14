@@ -8,9 +8,13 @@ const fs = require('fs');
 const path = require('path');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'underlord.html'), 'utf8');
-let src = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'));
+let src = html.slice(html.indexOf('<script>\n') + 9, html.lastIndexOf('</script>'));
+// Embedded YAML config blocks, served to the game through the getElementById stub below.
+const cfg = {};
+for (const m of html.matchAll(/<script type="text\/yaml" id="(cfg-[\w-]+)"[^>]*>\n([\s\S]*?)<\/script>/g)) cfg[m[1]] = m[2];
 const HOOK = 'newGame();resize();requestAnimationFrame(frame);';
 if (!src.includes(HOOK)) throw new Error('Startup line changed; update HOOK in tools/sim.cjs');
+if (require('child_process').spawnSync('node', [path.join(__dirname, 'sync-config.cjs'), '--check'], { stdio: 'inherit' }).status) process.exit(1);
 src = src.replace(HOOK, 'newGame();resize();globalThis.T={get G(){return G},update,draw,ui,serialize,deserialize,applyRect,start(){running=true}};');
 
 // Minimal DOM/canvas stubs: every unknown property is a callable no-op proxy,
@@ -31,7 +35,8 @@ const mk = () => {
   });
 };
 Object.assign(globalThis, {
-  document: { getElementById: () => mk(), createElement: () => mk() },
+  document: { getElementById: id => cfg[id] !== undefined ? { textContent: cfg[id] } : mk(), createElement: () => mk() },
+  Image: class { set src(v) {} },
   addEventListener: noop, devicePixelRatio: 1, requestAnimationFrame: noop,
   performance: { now: () => Date.now() },
   ResizeObserver: class { observe() {} },
