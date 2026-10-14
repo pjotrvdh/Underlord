@@ -34,7 +34,7 @@ Then open http://localhost:8765/underlord.html.
 - **Explore:** the map is hidden in clouds. Your units reveal what they can see, and walls block their sight. Gold seams and the two portals shine through the clouds. Hidden caverns hold treasure chests, wandering creatures that join you, and a camp of sleeping heroes.
 - **Build:** you build rooms on claimed ground by clicking a tile or dragging a rectangle. The rooms are Treasury, Lair, Hatchery, Training Room and Library.
 - **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
-- **Hand:** pick creatures up and drop them where they are needed. If you drop one on your own portal, you dismiss it. Right-click slaps a creature, and slapped imps work faster.
+- **Hand:** left-click a creature to pick it up (you can hold up to 8), then left-click your territory to drop it. A creature dropped into a Training Room, Library, Lair or Hatchery starts working there right away, with a small bonus. A dropped creature is dazed for a moment. If you drop one on your own portal, you dismiss it. Right-click slaps a creature, and slapped imps work faster.
 - **Spells:** Create Imp, Lightning, Heal and Call to Arms. You unlock the last three through research in the Library.
 - **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
 

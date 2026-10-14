@@ -34,5 +34,10 @@ waves:
   interval: 165         # seconds between invasions
   heroScalePerWave: 0.12
 
+hand:
+  capacity: 8          # creatures the Hand of Evil can hold at once
+  dropStun: 1.0        # seconds a dropped creature is dazed (as in Dungeon Keeper 2)
+  workBoost: 1.1       # work-speed bonus for a creature dropped straight into a room
+
 walls:
   hp: 8                 # hits to dig through a reinforced wall

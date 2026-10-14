@@ -61,6 +61,10 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
 .pool .n{color:var(--muted);font-variant-numeric:tabular-nums}
 .pool li.ok .need{color:#9fca7a}
 .pool .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.held{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;align-items:center;font-size:12px;color:var(--muted)}
+.held button{font-size:12px;padding:3px 7px;display:inline-flex;gap:5px;align-items:center}
+.held button.top{border-color:var(--gold)}
+.held .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .log{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.35;display:flex;flex-direction:column;gap:4px}
 .log li{color:var(--muted)}
 .log li:first-child{color:var(--ink)}
@@ -136,7 +140,7 @@ aside h2{font-family:var(--f-display);font-weight:500;font-size:19px;margin:0 0 
   </main>
 
   <aside>
-    <section><h2>Hand</h2><div class="tools" id="tHand"></div></section>
+    <section><h2>Hand</h2><div class="tools" id="tHand"></div><div class="held" id="held" hidden></div></section>
     <section><h2>Rooms</h2><div class="tools" id="tRooms"></div></section>
     <section><h2>Spells</h2><div class="tools" id="tSpells"></div></section>
     <section><h2>Portal</h2><ul class="pool" id="pool"></ul></section>
@@ -181,6 +185,11 @@ waves:
   first: 300            # seconds until the first invasion
   interval: 165         # seconds between invasions
   heroScalePerWave: 0.12
+
+hand:
+  capacity: 8          # creatures the Hand of Evil can hold at once
+  dropStun: 1.0        # seconds a dropped creature is dazed (as in Dungeon Keeper 2)
+  workBoost: 1.1       # work-speed bonus for a creature dropped straight into a room
 
 walls:
   hp: 8                 # hits to dig through a reinforced wall
@@ -281,7 +290,7 @@ const W=40,H=26,N=W*H;
 const ROCK=0,EARTH=1,GOLD=2,GEM=3,FLOOR=4,CLAIM=5,HEART=6,PORTAL=7,GATE=8,LAVA=9,WALL=10;
 const TREAS=1,LAIR=2,HATCH=3,TRAIN=4,LIB=5;
 const ROOM_IDS=['treasury','lair','hatchery','training','library']; // room codes 1..5
-const STATE_EN={think:'thinking',walk:'on the move',dig:'digging',claim:'claiming ground',reinforce:'reinforcing a wall',sleep:'sleeping',eat:'eating',train:'training',study:'studying',fight:'fighting',march:'advancing',leave:'leaving',idle:'loitering',flee:'fleeing',guard:'guarding',neutral:'wandering, unaligned'};
+const STATE_EN={think:'thinking',walk:'on the move',dig:'digging',claim:'claiming ground',reinforce:'reinforcing a wall',sleep:'sleeping',eat:'eating',train:'training',study:'studying',fight:'fighting',march:'advancing',leave:'leaving',idle:'loitering',stun:'dazed from the drop',flee:'fleeing',guard:'guarding',neutral:'wandering, unaligned'};
 const N4=[[1,0],[-1,0],[0,1],[0,-1]];
 /* ---------- config ---------- */
 // Settings live in config/*.yml. A copy of each file is embedded in <script type="text/yaml"> blocks,
@@ -672,7 +681,8 @@ function tick(e,dt){
     e.scan-=dt;if(e.scan<=0){e.scan=.5;if(G.time>=e.ignoreT){const o=nearestEnemy(e,e.side?5:8);if(o){release(e);e.state='fight';e.target=o;e.path=[];e.repath=0;}}}
   }
   switch(e.state){
-    case 'think':if(e.side){if(e.guard){e.state='guard';}else{e.state='march';e.path=[];e.repath=0;}}else if(e.kind==='imp')impThink(e);else creatureThink(e);break;
+    case 'stun':if((e.timer-=dt)<=0){if(e.after){e.state=e.after[0];e.timer=e.after[1];e.after=null;}else e.state='think';}break;
+    case 'think':e.boost=1;if(e.side){if(e.guard){e.state='guard';}else{e.state='march';e.path=[];e.repath=0;}}else if(e.kind==='imp')impThink(e);else creatureThink(e);break;
     case 'guard':break;
     case 'walk':case 'flee':if(step(e,dt))arrive(e);break;
     case 'idle':if((e.timer-=dt)<=0)e.state='think';break;
@@ -681,8 +691,8 @@ function tick(e,dt){
     case 'reinforce':doReinforce(e,dt);break;
     case 'sleep':if(G.room[ti(e)]!==LAIR){e.state='think';break;}e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.06*dt);if(e.hp>=e.maxhp)e.state='think';break;
     case 'eat':if(G.room[ti(e)]!==HATCH){e.state='think';break;}if((e.timer-=dt)<=0){e.hunger=0;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.15);e.state='think';}break;
-    case 'train':if(G.room[ti(e)]!==TRAIN||G.money<=0){e.state='think';break;}G.money=Math.max(0,G.money-ECON.trainCost*dt);gainXP(e,(e.kind==='troll'?11:9)*dt);if((e.timer-=dt)<=0)e.state='think';break;
-    case 'study':if(G.room[ti(e)]!==LIB){e.state='think';break;}research(dt*(e.kind==='warlock'?4:1.2));if((e.timer-=dt)<=0)e.state='think';break;
+    case 'train':if(G.room[ti(e)]!==TRAIN||G.money<=0){e.state='think';break;}G.money=Math.max(0,G.money-ECON.trainCost*dt);gainXP(e,(e.kind==='troll'?11:9)*(e.boost||1)*dt);if((e.timer-=dt)<=0)e.state='think';break;
+    case 'study':if(G.room[ti(e)]!==LIB){e.state='think';break;}research(dt*(e.kind==='warlock'?4:1.2)*(e.boost||1));if((e.timer-=dt)<=0)e.state='think';break;
     case 'fight':fight(e,dt);break;
     case 'march':march(e,dt);break;
     case 'leave':if(step(e,dt)){e.dead=true;toPool(e);fx({type:'ring',x:e.x,y:e.y,dur:.6,col:'#9b6bf0'});}break;
@@ -1028,6 +1038,14 @@ function toolValid(i){
   if(tool==='rally')return G.seen[i]&&walk(i);
   return G.seen[i];
 }
+// Dropping a creature (Dungeon Keeper 2 style): it lands dazed, and if it lands in a room it starts working there with a bonus.
+function dropHeld(i){
+  const d=G.held.pop();d.held=false;d.x=tx(i)+.5;d.y=ty(i)+.5;d.path=[];d.scan=0;d.target=null;
+  const r=G.room[i],k=d.kind!=='imp';
+  d.after=k&&r===TRAIN&&G.money>0?['train',8]:k&&r===LIB?['study',8]:k&&r===LAIR?['sleep',0]:k&&r===HATCH?['eat',2.5]:null;
+  d.boost=d.after?CFG.hand.workBoost:1;d.state='stun';d.timer=CFG.hand.dropStun;
+  fx({type:'ring',x:d.x,y:d.y,dur:.4,col:'#eadcc6'});fx({type:'dust',x:d.x,y:d.y+.3,dur:.4,col:'#8a6446'});
+}
 function entAt(fx,fy){let best=null,bd=.42;for(const e of G.ents){if(e.dead||e.held||e.side!==0)continue;const d=Math.hypot(e.x-fx,e.y-fy);if(d<bd){bd=d;best=e;}}return best;}
 function slapAt(fx,fy){const e=entAt(fx,fy);if(!e)return;e.slap=10;e.hp-=4;fx({type:'text',x:e.x,y:e.y-.3,dur:.6,txt:'Slap!',col:'#ffd2a8'});if(e.hp<=0){kill(e);return;}if(e.kind!=='imp'&&e.state!=='fight'){release(e);e.state='think';}}
 function build(i,r){
@@ -1067,15 +1085,17 @@ cv.addEventListener('pointerdown',ev=>{
   if(tool==='slap'){slapAt(p.fx,p.fy);return;}
   if(tool==='hand'){
     const e=entAt(p.fx,p.fy);
-    if(e&&G.held.length<8){release(e);e.held=true;e.path=[];e.target=null;G.held.push(e);return;}
+    if(e){if(G.held.length>=CFG.hand.capacity){msg('Your hand is full ('+CFG.hand.capacity+'). Drop a creature first.','handfull','bad');return;}release(e);e.held=true;e.path=[];e.target=null;e.boost=1;G.held.push(e);return;}
     if(G.held.length&&ownPortal(i)&&G.held[G.held.length-1].kind!=='imp'){const d=G.held.pop();d.dead=true;toPool(d);fx({type:'ring',x:p.x+.5,y:p.y+.5,dur:.6,col:'#c58cff'});msg('You dismissed your '+KINDS[d.kind].n+' through the portal.','dis'+d.id);return;}
-    if(G.held.length&&(G.t[i]===CLAIM||ownPortal(i))){const d=G.held.pop();d.held=false;d.x=p.x+.5;d.y=p.y+.5;d.state='think';d.path=[];d.scan=0;fx({type:'ring',x:d.x,y:d.y,dur:.35,col:'#eadcc6'});return;}
+    if(G.held.length&&(G.t[i]===CLAIM||ownPortal(i))){dropHeld(i);return;}
+    if(G.held.length&&G.seen[i]){msg('You can only drop creatures on your own territory.','dropbad','bad');return;}
     drag={mode:G.mark[i]&&diggable(i)?'unmark':'mark',x0:p.x,y0:p.y,x1:p.x,y1:p.y};return;
   }
   if(ROOMS[tool]||tool==='sell'){drag={mode:String(tool),x0:p.x,y0:p.y,x1:p.x,y1:p.y};return;}
   if(SPELLS[tool])cast(tool,i,p.fx,p.fy);
 });
 cv.addEventListener('pointermove',ev=>{
+  if(!pan&&!pinch)cv.style.cursor=tool==='hand'&&G&&entAt((ev.clientX-cv.getBoundingClientRect().left-cam.x)/TS,(ev.clientY-cv.getBoundingClientRect().top-cam.y)/TS)?'grab':'';
   const p=evPos(ev);if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,p);hover={...p,in:true};
   if(pinch&&ptrs.size===2){const[a,b]=[...ptrs.values()];const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;
     Z=Math.max(1,Math.min(4,pinch.z*Math.hypot(a.sx-b.sx,a.sy-b.sy)/pinch.d));TS=BASE*Z;cam.x=mx-pinch.wx*TS;cam.y=my-pinch.wy*TS;clampCam();return;}
@@ -1160,6 +1180,8 @@ function ui(){
   for(const[k,a]of Object.entries(ATTRACT)){const ok=a.ok();ph+='<li class="'+(ok?'ok':'')+'"><i class="dot" style="background:'+KINDS[k].col+'"></i><b>'+KINDS[k].n+'</b><span class="n">'+G.pool[k]+' left</span><span class="need">'+(ok?'✓ ':'Needs ')+a.need+'</span></li>';}
   ph+='<li><span class="need">Creatures: '+n+' / '+PORTAL_LIMIT+' · free beds: '+Math.max(0,G.rc[LAIR]-n)+(anyPortal()?' · next arrival in '+fmtT(G.portalT):'')+'</span></li>';
   const pl=$('pool');if(pl.innerHTML!==ph)pl.innerHTML=ph;
+  const hd=$('held'),hh=G.held.length?'<span>In hand '+G.held.length+'/'+CFG.hand.capacity+' · next drop:</span>'+G.held.slice().reverse().map((e,n)=>'<button type="button" data-id="'+e.id+'" class="'+(n?'':'top')+'" title="Drop this one next"><i class="dot" style="background:'+KINDS[e.kind].col+'"></i>'+KINDS[e.kind].n+(e.lvl>1?' '+e.lvl:'')+'</button>').join(''):'';
+  hd.hidden=!G.held.length;if(hd.innerHTML!==hh)hd.innerHTML=hh;
 }
 function syncPause(){document.getElementById('bPause').textContent=paused?'Resume':'Pause';}
 document.getElementById('bPause').onclick=()=>{paused=!paused;syncPause();};
@@ -1186,6 +1208,7 @@ for(const[label,fn]of CHEATS){const b=document.createElement('button');b.type='b
   b.onclick=()=>{if(!running||G.over)return;const r=fn();msg('Cheat: '+r+'.','cheat'+G.time+label,'good');};document.getElementById('cheatList').appendChild(b);}
 function toggleCheats(open){const c=document.getElementById('cheats'),b=document.getElementById('bCheat');open=open??c.hidden;c.hidden=!open;b.setAttribute('aria-expanded',String(open));}
 document.getElementById('bCheat').onclick=()=>toggleCheats();
+document.getElementById('held').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const k=G.held.findIndex(e=>e.id===+b.dataset.id);if(k>=0){G.held.push(G.held.splice(k,1)[0]);ui();}};
 document.getElementById('bSave').onclick=()=>{if(running)saveGame(false);};
 document.getElementById('bLoad').onclick=()=>loadGame();
 const keys=new Set();

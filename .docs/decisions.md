@@ -29,6 +29,8 @@ The owner (pjotr, Dutch-speaking) asked for these things, in this order. Keep th
 14. **Separate SVG assets** in `assets/`, so the owner can restyle units and tiles and raise the resolution. Every asset keeps a procedural fallback.
 15. **YAML config files** for settings like start gold and for the creature definitions. YAML needs a parser, and a CDN library would not work offline from disk, so the game has its own small subset parser. The files are embedded in the HTML (synced by a tool), so the single file still works on its own and as an artifact.
 
+16. **Picking up and dropping creatures as in Dungeon Keeper 2** (ludo.guide DK2 Hand of Evil guide): left-click to pick up and to drop, and you can carry several. A creature dropped in a room starts working there with a +10% bonus, and a creature landing is briefly stunned. We could not confirm whether DK only lets you pick up on your own territory, so pick-up works everywhere and dropping only on your own territory.
+
 ## Our own balancing decisions
 
 These came out of the headless simulation:

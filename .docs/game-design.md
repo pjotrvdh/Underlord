@@ -147,6 +147,23 @@ All economy numbers live in the `ECON` object, so the planned difficulty setting
 | Heal | 400 | 200 | full heal for your units within 2.5 tiles |
 | Call to Arms | 800 | 300 | all creatures gather at the spot for 20 s |
 
+## Hand of Evil
+
+Modelled on Dungeon Keeper 2:
+
+- **Pick up:** with the Hand tool, left-click one of your units. The cursor turns into a grab hand over them.
+- **Capacity:** the hand holds `hand.capacity` (8) units. The DK sources give no number, so 8 is our own choice.
+- **Drop:** left-click your own territory (or your own portal). Elsewhere you get a message instead.
+- **Landing:** a dropped unit is dazed for `hand.dropStun` (1 s) and cannot act, so dropping it next to enemies is a risk.
+- **Drop to assign work:** a creature that lands in a room starts the matching work right away, with a `hand.workBoost` (+10%) bonus for that session:
+  - Training Room → train (only if you have gold)
+  - Library → study
+  - Lair → sleep
+  - Hatchery → eat
+- **Dismiss:** drop a creature on your own portal.
+- **Panel:** under the Hand tools you see what you are holding. The next one to drop is outlined, and clicking a creature makes it the next drop.
+- **Slap:** right-click. Saving keeps held units in your hand.
+
 ## Cheats
 
 The **Cheats** button in the header (shortcut: the backtick key or `Ctrl+C`) opens a panel with:
