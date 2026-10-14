@@ -134,7 +134,7 @@ function genMap(){
     const pick=()=>cells.splice(rand(cells.length),1)[0];
     if(k===0){const a=pick(),b=pick();G.loot[pick()]=600;
       for(const[kind,i]of[['knight',a],['archer',b]]){const e=spawn(kind,tx(i),ty(i));e.guard=true;e.state='guard';}}
-    else if(k<=2){const i=pick();const e=spawn(k===1?'goblin':'troll',tx(i),ty(i));e.side=2;e.state='neutral';G.loot[pick()]=200;}
+    else if(k<=2){const i=pick();const e=spawn(k===1?'orc':'troll',tx(i),ty(i));e.side=2;e.state='neutral';G.loot[pick()]=200;}
     else{G.loot[pick()]=250;G.loot[pick()]=150;}
   });
 }
@@ -633,7 +633,7 @@ function drawEnt(e,now,ex,ey,alpha=1){
   circ(x-r*.3,yy-r*.35,r*.35,'rgba(255,255,255,.18)');
   if(e.kind==='imp'){circ(x+e.face*r*.35,yy-r*.1,r*.14,'#ffe9a0');}
   else{ctx.fillStyle=e.side===1?'#0e1520':e.side===2?'#d8d0c4':'#120c0a';ctx.font='700 '+Math.round(r*1.15)+'px "Alegreya Sans",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(e.side===2?'?':k.g,x,yy+r*.06);}
-  if(e.side===1&&e.kind!=='dwarf'&&e.kind!=='archer'){ctx.fillStyle='#e6eef9';ctx.fillRect(x-r*.12,yy-r*1.45,r*.24,r*.4);}
+  if(e.side===1&&e.kind!=='tunneller'&&e.kind!=='archer'){ctx.fillStyle='#e6eef9';ctx.fillRect(x-r*.12,yy-r*1.45,r*.24,r*.4);}
   }
   if(e.carry>0)circ(x+r*.75,yy+r*.4,s*.08+s*.04*Math.min(1,e.carry/100),'#e3b23c');
   if(e.hp<e.maxhp){const w=s*.7,hy_=us?yy+r*.95-sz-s*.08:yy-r-s*.2;rr(x-w/2,hy_,w,s*.07,'rgba(0,0,0,.7)');rr(x-w/2,hy_,w*Math.max(0,e.hp/e.maxhp),s*.07,e.side===1?'#8fb4ef':'#5fcf6a');}
@@ -1025,7 +1025,7 @@ const CHEATS=[
   ['Finish research',()=>{research(Math.max(0,SPELLS.rally.req-G.research));return 'all spells unlocked';}],
   ['Restore Heart',()=>{G.heartHP=G.heartMax;return 'Heart restored';}],
   ['Free imp',()=>{const r=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM)r.push(i);const i=r[rand(r.length)];spawn('imp',tx(i),ty(i));return 'free imp';}],
-  ...['goblin','warlock','troll','mistress'].map(k=>['+ '+KINDS[k].n,()=>{const p=G.portals.find(q=>G.pown[q]);const i=p!==undefined?p:ix(G.hx+2,G.hy);const e=spawn(k,tx(i),ty(i));fx({type:'ring',x:e.x,y:e.y,dur:.8,col:'#c58cff'});return KINDS[k].n+' summoned';}]),
+  ...['orc','warlock','troll','mistress'].map(k=>['+ '+KINDS[k].n,()=>{const p=G.portals.find(q=>G.pown[q]);const i=p!==undefined?p:ix(G.hx+2,G.hy);const e=spawn(k,tx(i),ty(i));fx({type:'ring',x:e.x,y:e.y,dur:.8,col:'#c58cff'});return KINDS[k].n+' summoned';}]),
   ['Level up all',()=>{for(const e of creatures())gainXP(e,need(e)-e.xp);return 'creatures levelled up';}],
   ['Next wave now',()=>{if(G.wave>=WAVES.length)return 'no waves left';G.nextWave=0;return 'next wave called';}],
   ['Defeat heroes',()=>{let n=0;for(const e of G.ents)if(e.side===1&&!e.dead){kill(e);n++;}return n+' heroes defeated';}],

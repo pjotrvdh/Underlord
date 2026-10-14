@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 trait HasConfigDefaults
 {
     /**
-     * The config entry for this record, e.g. config('underlord.creatures.goblin').
+     * The config entry for this record, e.g. config('underlord.creatures.troll').
      *
      * @return array<string, mixed>|null
      */

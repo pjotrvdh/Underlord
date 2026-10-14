@@ -20,7 +20,7 @@ class WaveForm
             ->components([
                 FormLayout::make(
                     main: [
-                        // Stored as {"dwarf": 2, ...}; edited as a list of hero + count rows.
+                        // Stored as {"tunneller": 2, ...}; edited as a list of hero + count rows.
                         DefaultValue::on(Repeater::make('heroes'))
                             ->label(__('resource.wave.fields.heroes'))
                             ->columns(2)

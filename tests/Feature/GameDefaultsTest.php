@@ -88,4 +88,14 @@ class GameDefaultsTest extends TestCase
 
         $this->get("/admin/creatures/{$troll->getKey()}/edit")->assertOk()->assertSee($admin->name);
     }
+
+    public function test_sync_removes_records_the_config_no_longer_lists(): void
+    {
+        Creature::query()->create(['key' => 'goblin', 'side' => Creature::SIDE_CREATURE, 'name' => 'Goblin', 'hp' => 90, 'attack' => 9, 'speed' => 2.4]);
+
+        resolve(GameDefaults::class)->sync();
+
+        $this->assertFalse(Creature::query()->whereKey('goblin')->exists());
+        $this->assertTrue(Creature::query()->whereKey('orc')->exists());
+    }
 }

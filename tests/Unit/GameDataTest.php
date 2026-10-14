@@ -28,9 +28,9 @@ class GameDataTest extends TestCase
 
     public function test_hero_rows_turn_repeater_rows_into_the_stored_map(): void
     {
-        $rows = [['hero' => 'dwarf', 'count' => '2'], ['hero' => 'archer', 'count' => 1], ['count' => 3]];
+        $rows = [['hero' => 'tunneller', 'count' => '2'], ['hero' => 'archer', 'count' => 1], ['count' => 3]];
 
-        $this->assertSame(['dwarf' => 2, 'archer' => 1], GameData::heroRows($rows));
+        $this->assertSame(['tunneller' => 2, 'archer' => 1], GameData::heroRows($rows));
         $this->assertSame([], GameData::heroRows('nonsense'));
     }
 

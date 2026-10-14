@@ -7,28 +7,28 @@ declare(strict_types=1);
  */
 return [
     [
-        'dwarf' => 2,
+        'tunneller' => 2,
         'archer' => 1,
     ],
     [
-        'dwarf' => 3,
+        'tunneller' => 3,
         'archer' => 2,
         'wizard' => 1,
     ],
     [
-        'dwarf' => 2,
+        'tunneller' => 2,
         'archer' => 2,
         'wizard' => 2,
         'knight' => 1,
     ],
     [
-        'dwarf' => 3,
+        'tunneller' => 3,
         'archer' => 3,
         'wizard' => 2,
         'knight' => 2,
     ],
     [
-        'dwarf' => 4,
+        'tunneller' => 4,
         'archer' => 3,
         'wizard' => 3,
         'knight' => 3,
@@ -38,6 +38,6 @@ return [
         'knight' => 2,
         'wizard' => 3,
         'archer' => 3,
-        'dwarf' => 2,
+        'tunneller' => 2,
     ],
 ];

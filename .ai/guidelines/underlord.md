@@ -9,6 +9,7 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 
 ## Game data
 
+- **Only creatures and heroes from the original Dungeon Keeper (1997)** are in the game; don't introduce others.
 - **Defaults live in config:** `config/underlord/{settings,creatures,rooms,spells,waves}.php`. The config order is the order used everywhere.
 - **The database holds the current values,** keyed by handle: `troll`, `lair`, `bolt`, `economy.startGold`; waves use their number.
 - `App\Services\GameDefaults` adds missing defaults after every `artisan migrate`, without overwriting edits. `ddev exec artisan underlord:defaults --reset` restores everything.

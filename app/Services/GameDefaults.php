@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * creatures, rooms, spells and waves. Colours stay in config only; they are not editable. The admin panel can only edit these records, never create
  * them, so this is the one place they come from.
  *
- * sync() adds whatever is missing and leaves edited records alone; sync(reset: true) puts every
- * record back to its default. It runs after every `artisan migrate` (see AppServiceProvider).
+ * sync() adds whatever is missing, removes records the config no longer lists, and leaves edited
+ * records alone; sync(reset: true) puts every record back to its default. It runs after every `artisan migrate` (see AppServiceProvider).
  */
 class GameDefaults
 {
@@ -62,6 +62,28 @@ class GameDefaults
         foreach (GameData::waves() as $n => $heroes) {
             $this->put(Wave::class, ['number' => $n + 1], ['heroes' => $heroes]);
         }
+
+        $this->prune();
+    }
+
+    /**
+     * The config decides which records exist: remove any that it no longer lists (e.g. a creature
+     * that was replaced).
+     */
+    private function prune(): void
+    {
+        $settings = [];
+        foreach (GameData::settings() as $group => $values) {
+            foreach (array_keys($values) as $key) {
+                $settings[] = $group.'.'.$key;
+            }
+        }
+
+        Setting::query()->whereNotIn('key', $settings)->delete();
+        Creature::query()->whereNotIn('key', array_keys(GameData::creatures()))->delete();
+        Room::query()->whereNotIn('key', array_keys(GameData::rooms()))->delete();
+        Spell::query()->whereNotIn('key', array_keys(GameData::spells()))->delete();
+        Wave::query()->where('number', '>', count(GameData::waves()))->delete();
     }
 
     /**

@@ -75,7 +75,7 @@ final class GameData
     }
 
     /**
-     * Turn a hero repeater's rows into the stored map: [['hero' => 'dwarf', 'count' => '2']] → ['dwarf' => 2].
+     * Turn a hero repeater's rows into the stored map: [['hero' => 'tunneller', 'count' => '2']] → ['tunneller' => 2].
      *
      * @return array<string, int>
      */

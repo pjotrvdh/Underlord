@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 /*
  * Default creatures and heroes, in the order the game and the admin panel list them.
+ * Only creatures and heroes from the original Dungeon Keeper (1997) belong here.
  *   side     creature (comes through your portal) or hero (invades)
  *   speed    tiles per second; range in tiles (1 = melee); rate = seconds between attacks
  *   wage     gold per payday; vision in tiles; pool = how many can come through portals per map
@@ -23,19 +24,21 @@ return [
         'wage' => 0,
         'color' => '#c8552f',
     ],
-    'goblin' => [
+    // In Dungeon Keeper 1 the Orc needs a Barracks, which this game does not have (yet), so it only
+    // needs a free bed, like the basic fighter it replaces.
+    'orc' => [
         'side' => 'creature',
-        'name' => 'Goblin',
-        'hp' => 90,
-        'attack' => 9,
-        'speed' => 2.4,
+        'name' => 'Orc',
+        'hp' => 100,
+        'attack' => 10,
+        'speed' => 2.3,
         'range' => 1,
         'rate' => 0.9,
         'wage' => 40,
         'vision' => 5,
         'pool' => 8,
         'attract' => [],
-        'color' => '#6f9a35',
+        'color' => '#b0457a',
     ],
     'warlock' => [
         'side' => 'creature',
@@ -79,9 +82,10 @@ return [
         'attract' => ['training' => 9],
         'color' => '#c43d7e',
     ],
-    'dwarf' => [
+    // The Dungeon Keeper 1 Tunneller: the dwarf hero that digs its way to your dungeon.
+    'tunneller' => [
         'side' => 'hero',
-        'name' => 'Dwarf',
+        'name' => 'Tunneller',
         'hp' => 80,
         'attack' => 8,
         'speed' => 2.0,

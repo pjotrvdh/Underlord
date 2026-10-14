@@ -10,11 +10,11 @@ declare(strict_types=1);
 return [
     'units' => [
         'imp' => 'assets/units/imp.svg',
-        'goblin' => 'assets/units/goblin.svg',
+        'orc' => 'assets/units/orc.svg',
         'warlock' => 'assets/units/warlock.svg',
         'troll' => 'assets/units/troll.svg',
         'mistress' => 'assets/units/mistress.svg',
-        'dwarf' => 'assets/units/dwarf.svg',
+        'tunneller' => 'assets/units/tunneller.svg',
         'archer' => 'assets/units/archer.svg',
         'wizard' => 'assets/units/wizard.svg',
         'knight' => 'assets/units/knight.svg',

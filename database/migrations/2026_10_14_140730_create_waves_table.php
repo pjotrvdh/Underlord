@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('waves', function (Blueprint $table): void {
             $table->unsignedInteger('number')->primary();
-            $table->json('heroes'); // {"dwarf": 2, "archer": 1}
+            $table->json('heroes'); // {"tunneller": 2, "archer": 1}
             // Game data comes from config/underlord; only changes made in the admin panel are tracked.
             $table->timestamp('updated_at')->nullable();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
