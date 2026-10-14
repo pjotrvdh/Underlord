@@ -1,58 +1,91 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Underlord
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A browser game in the spirit of *Dungeon Keeper*. You are an evil overlord deep underground: dig into a cloud-covered map, claim territory, build rooms, attract creatures through portals and defend your Dungeon Heart against six invasions from the surface.
 
-## About Laravel
+The game runs on Laravel. Its settings (economy, creatures, rooms, spells and waves) live in the database, and admins edit them in a Filament admin panel. The original single-file version is on the [`legacy`](../../tree/legacy) branch.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## How to play
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Dig:** click a block to mark it for digging, or drag to mark a whole rectangle. You can mark blocks inside the clouds too. Your imps dig the blocks out, carry the gold to the Heart or a Treasury, and claim the new floor.
+- **Walls:** idle imps reinforce the earth walls around your territory. Heroes take much longer to tunnel through a reinforced wall.
+- **Explore:** the map is hidden in clouds. Your units reveal what they can see, and walls block their sight. Gold seams and the two portals shine through the clouds. Hidden caverns hold treasure chests, wandering creatures that join you, and a camp of sleeping heroes.
+- **Build:** you build rooms on claimed ground by clicking a tile or dragging a rectangle. The rooms are Treasury, Lair, Hatchery, Training Room and Library.
+- **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
+- **Hand:** left-click a creature to pick it up (you can hold up to 8), then left-click your territory to drop it.
+  - A creature dropped into a Training Room, Library, Lair or Hatchery starts working there right away, with a small bonus.
+  - A dropped creature is dazed for a moment.
+  - Dropping a creature on your own portal dismisses it.
+  - Right-click slaps a creature; slapped imps work faster.
+- **Spells:** Create Imp, Lightning, Heal and Call to Arms. You unlock the last three through research in the Library.
+- **Control panel:** a minimap at the top (click it to jump there), then Info, Rooms, Spells and Creatures tabs. The Creatures tab shows, for each type, how many are idle, working and fighting. Click a number to pick one of them up, or right-click it to look at it.
+- **Computer Assistant:** the **C** button on the minimap lets the computer play for you, in one of four modes: Aggressive, Defensive, Construction only or Move only.
+- **Saving:** logged-in players save to their account; guests save in their browser. The game also autosaves every two minutes.
+- **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Controls
 
-## Learning Laravel
+| Action | Mouse / touch | Keyboard |
+|---|---|---|
+| Mark for digging / build | click or drag | |
+| Slap | right-click | |
+| Scroll the map | right- or middle-drag, the **Look** tool, two-finger drag | arrow keys / WASD |
+| Zoom | mouse wheel, pinch, **+ / − / Fit** buttons | `+` / `-` |
+| Pause | **Pause** button | `Space` / `P` |
+| Game speed | **1×** button | `1` `2` `3` |
+| Back to the hand tool | | `Esc` |
+| Cheats panel (admins only) | **Cheats** button | `` ` `` |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Getting started
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+You need [Docker](https://www.docker.com/) and [DDEV](https://ddev.com/). Everything else runs inside DDEV.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+ddev start
+ddev composer install
+ddev artisan migrate:fresh --seed
+ddev npm ci
+ddev npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- **Game:** https://underlord.ddev.site
+- **Admin panel:** https://underlord.ddev.site/admin. Locally, a developer login is shown on the login page. The seeder creates `admin@underlord.test` with the password `password`.
+- **Front-end development:** run `ddev npm run dev` instead of `build` for hot reloading.
 
-## Contributing
+## Game data
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The game's data has its defaults in code, and its current values in the database:
 
-## Code of Conduct
+| What | Defaults | Edited in |
+|---|---|---|
+| Settings (economy, Heart, portals, waves, …) | `config/underlord/settings.php` | admin panel → Settings |
+| Creatures and heroes | `config/underlord/creatures.php` | admin panel → Creatures |
+| Rooms | `config/underlord/rooms.php` | admin panel → Rooms |
+| Spells | `config/underlord/spells.php` | admin panel → Spells |
+| Hero waves | `config/underlord/waves.php` | admin panel → Waves |
+| SVG graphics | `config/underlord/assets.php` and `public/assets/` | the project only |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- After every `migrate`, missing defaults are copied into the database. Records you edited in the admin panel are left alone.
+- To put everything back to the defaults, run `ddev artisan underlord:defaults --reset`.
+- In the admin panel, every field shows its default and turns orange when it has been changed.
+- Game data can only be edited there. New creatures, rooms or settings are added in `config/underlord/`.
+- The colours of creatures and rooms, and the SVGs, are managed in the project only.
+- See [`public/assets/README.md`](public/assets/README.md) for the size and orientation of the SVGs.
 
-## Security Vulnerabilities
+## Admin panel
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- Only users with **Admin** switched on can open `/admin`. They can also use the in-game Cheats menu.
+- Admins manage players under **Players** and can play as a player (impersonate) to check their game and saves.
 
-## License
+## Development
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Command | What it does |
+|---|---|
+| `ddev composer test` | the test suite (PHPUnit, in-memory SQLite) |
+| `ddev composer analyse` | PHPStan/Larastan at the max level |
+| `ddev composer format-check` | Rector (dry run) and Pint |
+| `ddev composer format` | apply Rector and Pint |
+
+GitHub Actions runs the same checks on every pull request, plus a Composer and npm security audit.
+
+- **Migrations** only go forward: there are no `down()` methods, and mistakes are fixed with a new migration.
+- **AI agents:** the project uses [Laravel Boost](https://laravel.com/docs/ai). After cloning, run `ddev artisan boost:install` to generate the agent files (`AGENTS.md`, `CLAUDE.md`, MCP config). The project's own agent rules are in [`.ai/guidelines`](.ai/guidelines) and [`.ai/rules`](.ai/rules).
