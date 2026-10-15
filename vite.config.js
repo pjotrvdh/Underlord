@@ -21,6 +21,10 @@ function buildVersion() {
     }
 }
 
+// `ddev start`: Vite runs inside the DDEV web container and is served through the DDEV router
+// on https://<project>.ddev.site (see .ddev/config.yaml), with hot reloading over wss.
+const ddevHost = process.env.IS_DDEV_PROJECT ? process.env.DDEV_HOSTNAME?.split(',')[0] : null;
+
 export default defineConfig({
     // Relative paths, so the build also works from a sub-path such as GitHub Pages (/Underlord/).
     base: './',
@@ -28,6 +32,13 @@ export default defineConfig({
     build: {
         assetsDir: 'build',
     },
+    server: ddevHost ? {
+        host: true,
+        port: 5173,
+        strictPort: true,
+        allowedHosts: [ddevHost],
+        hmr: { host: ddevHost, protocol: 'wss', clientPort: 443 },
+    } : {},
     define: {
         __BUILD_VERSION__: JSON.stringify(buildVersion()),
     },

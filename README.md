@@ -39,12 +39,20 @@ The game is a static web page built with [Vite](https://vite.dev): no server, no
 
 ## Getting started
 
-You need [Node.js](https://nodejs.org/) 24 or newer.
+**With [DDEV](https://ddev.com/):** `ddev start` installs the packages and runs the Vite dev server on https://underlord.ddev.site, with hot reloading. Run other commands inside DDEV too, for example `ddev npm run build`.
+
+```bash
+ddev start
+```
+
+**Without DDEV:** you need [Node.js](https://nodejs.org/) 24 or newer.
 
 ```bash
 npm ci
 npm run dev
 ```
+
+`node_modules` is shared between your computer and DDEV, and Vite's bundler is different per platform. Stick to one of the two, or run `npm ci` again after switching (DDEV does that by itself on start).
 
 | Command | What it does |
 |---|---|
@@ -58,6 +66,7 @@ The build uses relative paths, so `dist/` works from any folder or sub-path. The
 
 ```
 index.html              the game page
+.ddev/                  DDEV: config.yaml and start-vite.sh, which runs the Vite dev server
 public/                 copied as-is into the build
   assets/               SVG graphics (see public/assets/README.md)
   favicon.svg

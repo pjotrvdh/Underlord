@@ -7,6 +7,7 @@ Underlord is a Dungeon Keeper-style browser game. The owner talks to you in **Du
 - A static web page built with Vite. There is no server and no database; games are saved in localStorage.
 - `index.html` is the page; `src/main.js` loads `src/styles/underlord.css` and `src/game/underlord.js`.
 - `npm run dev` starts a dev server, `npm run build` builds into `dist/` with relative paths. The `github pages` workflow publishes `dist/` on every push to `main`.
+- DDEV (default `ddev.site` TLD, no PHP or database): `ddev start` runs Vite through `.ddev/start-vite.sh` on https://underlord.ddev.site. Run npm commands as `ddev npm …` when DDEV is used.
 
 ## Game data
 
