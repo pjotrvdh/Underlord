@@ -16,19 +16,19 @@ return [
     ],
     'bolt' => [
         'name' => 'Lightning',
-        'research' => 150,
-        'cost' => 250,
+        'research' => 500,
+        'cost' => 600,
         'params' => ['damage' => 90, 'radius' => 1.6],
     ],
     'heal' => [
         'name' => 'Heal',
         'research' => 400,
-        'cost' => 200,
+        'cost' => 300,
         'params' => ['radius' => 2.5],
     ],
     'rally' => [
         'name' => 'Call to Arms',
-        'research' => 800,
+        'research' => 150,
         'cost' => 300,
         'params' => ['duration' => 20],
     ],

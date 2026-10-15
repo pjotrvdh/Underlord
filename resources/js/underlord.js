@@ -199,7 +199,7 @@ function go(e,path,next,t=0){e.path=path;e.next=next;e.nextT=t;e.state='walk';}
 function step(e,dt){
   if(!e.path.length)return true;
   const n=e.path[0],cx=tx(n)+.5,cy=ty(n)+.5,dx=cx-e.x,dy=cy-e.y,d=Math.hypot(dx,dy);
-  const sp=KINDS[e.kind].spd*(e.slap>0?1.7:1)*dt;
+  const sp=KINDS[e.kind].spd*(e.slap>0?SLAP_BOOST:1)*dt;
   if(Math.abs(dx)>.01)e.face=Math.sign(dx);
   if(d<=sp){e.x=cx;e.y=cy;e.path.shift();return !e.path.length;}
   e.x+=dx/d*sp;e.y+=dy/d*sp;return false;
@@ -242,7 +242,7 @@ function doDig(e,dt){
   const j=e.task;
   if(j<0||!G.mark[j]||!diggable(j)||nb(ti(e),k=>k===j)<0){e.state='think';return;}
   e.face=Math.sign(tx(j)-tx(ti(e)))||e.face;
-  e.timer-=dt*(e.slap>0?1.8:1);if(e.timer>0)return;e.timer=.38;
+  e.timer-=dt*(e.slap>0?SLAP_BOOST:1);if(e.timer>0)return;e.timer=.38;
   const t=G.t[j];
   if(t===EARTH||t===WALL){if(--G.hp[j]<=0)openTile(j);}
   else if(t===GOLD){const g=Math.min(20,G.gold[j]);G.gold[j]-=g;e.carry+=g;if(G.gold[j]<=0)openTile(j);}
@@ -256,14 +256,14 @@ function doReinforce(e,dt){
   const j=e.task;
   if(j<0||G.t[j]!==EARTH||G.mark[j]||G.t[ti(e)]!==CLAIM||nb(ti(e),k=>k===j)<0){e.state='think';return;}
   e.face=Math.sign(tx(j)-tx(ti(e)))||e.face;
-  e.timer-=dt*(e.slap>0?1.8:1);if(e.timer>0)return;e.timer=.5;
+  e.timer-=dt*(e.slap>0?SLAP_BOOST:1);if(e.timer>0)return;e.timer=.5;
   e.work=(e.work||0)+1;fx({type:'dust',x:(e.x+tx(j)+.5)/2,y:(e.y+ty(j)+.5)/2,dur:.3,col:'#b8a89a'});
   if(e.work>=5){e.work=0;G.t[j]=WALL;G.hp[j]=WALL_HP;e.state='think';}
 }
 function doClaim(e,dt){
   const i=ti(e);
   if(i!==e.task||!(G.t[i]===FLOOR||(G.t[i]===PORTAL&&!G.pown[i]))){e.state='think';return;}
-  e.timer-=dt*(e.slap>0?1.8:1);if(e.timer>0)return;
+  e.timer-=dt*(e.slap>0?SLAP_BOOST:1);if(e.timer>0)return;
   if(nb(i,j=>G.t[j]===CLAIM)>=0){
     if(G.t[i]===PORTAL){G.pown[i]=1;msg('A portal is yours. Creatures can now arrive through it.','portal'+i,'good');}
     else G.t[i]=CLAIM;
@@ -866,11 +866,14 @@ function applyRect(mode,R){
   if(G.money>cap()){msg('Not all the gold fit in your treasuries.','lost','bad');G.money=cap();}
 }
 function recount(){G.rc=[0,0,0,0,0,0];for(let i=0;i<N;i++)if(G.room[i])G.rc[G.room[i]]++;}
+// Dungeon Keeper: a slapped imp works 25% faster for a while.
+const SLAP_BOOST=1.25;
 function impCost(){return CFG.imp.baseCost+CFG.imp.perImp*G.ents.filter(e=>e.kind==='imp').length;}
-function spellCost(k){return k==='imp'?impCost():SPELLS[k].cost;}
+// Call to Arms is free on your own territory, as in Dungeon Keeper.
+function spellCost(k,i){return k==='imp'?impCost():k==='rally'&&i!==undefined&&G.t[i]===CLAIM?0:SPELLS[k].cost;}
 function cast(k,i,fx_,fy_){
   const s=SPELLS[k];if(G.research<s.req){msg(s.n+' has not been researched yet.','req','bad');return;}
-  const c=spellCost(k);if(G.money<c){msg('Not enough gold for '+s.n+'.','nogold','bad');return;}
+  const c=spellCost(k,i);if(G.money<c){msg('Not enough gold for '+s.n+'.','nogold','bad');return;}
   if(k==='imp'){if(G.t[i]!==CLAIM)return;const e=spawn('imp',tx(i),ty(i));fx({type:'ring',x:e.x,y:e.y,dur:.6,col:'#e0483c'});}
   else if(k==='bolt'){if(!G.seen[i])return;fx({type:'bolt',x:fx_,y:fy_,dur:.45,seed:rand(999)});for(const o of G.ents){if(o.dead||o.side!==1)continue;if(Math.hypot(o.x-fx_,o.y-fy_)<s.radius){o.hp-=s.damage;fx({type:'text',x:o.x,y:o.y-.3,dur:.8,txt:'-'+s.damage,col:'#dfe9ff'});if(o.hp<=0)kill(o);}}}
   else if(k==='heal'){fx({type:'heal',x:fx_,y:fy_,dur:.6});for(const o of G.ents)if(!o.dead&&o.side===0&&Math.hypot(o.x-fx_,o.y-fy_)<s.radius)o.hp=o.maxhp;}
@@ -974,7 +977,7 @@ function ui(){
       if(G.room[i])h+='<br>'+ROOMS[G.room[i]].n+': '+ROOMS[G.room[i]].tip.toLowerCase();}
   }else if(ROOMS[tool])h='<b>'+ROOMS[tool].n+'</b><br>'+ROOMS[tool].tip+'. Click a tile, or drag a rectangle over your territory.';
   else if(tool==='hand')h=G.held.length?'<b>In hand: '+G.held.length+'</b><br>Click your territory to drop.':'<b>Hand</b><br>Click a block to dig it, or drag to mark an area. Click a creature to pick it up.';
-  else if(SPELLS[tool])h='<b>'+SPELLS[tool].n+'</b><br>'+({imp:'Click your territory to summon a new imp.',bolt:'Strikes heroes around the clicked spot.',heal:'Heals your creatures around the clicked spot.',rally:'All creatures gather at this spot for 20 seconds.'})[tool];
+  else if(SPELLS[tool])h='<b>'+SPELLS[tool].n+'</b><br>'+({imp:'Click your territory to summon a new imp.',bolt:'Strikes heroes around the clicked spot.',heal:'Heals your creatures around the clicked spot.',rally:'All creatures gather at this spot for 20 seconds. Free on your own territory.'})[tool];
   else if(tool==='sell')h='<b>Sell</b><br>Click or drag over rooms to tear them down.';
   else if(tool==='look')h='<b>Look</b><br>Drag to scroll the map. Scroll or pinch to zoom.';
   else h='<b>Slap</b><br>A slapped imp works faster for 10 seconds.';
@@ -1040,7 +1043,7 @@ const CHEATS=[
   ['+500 gold',()=>{G.money+=500;return '+500 gold';}],
   ['+5000 gold',()=>{G.money+=5000;return '+5000 gold';}],
   ['Reveal map',()=>{G.seen.fill(1);G.fogDirty=true;return 'map revealed';}],
-  ['Finish research',()=>{research(Math.max(0,SPELLS.rally.req-G.research));return 'all spells unlocked';}],
+  ['Finish research',()=>{research(Math.max(0,...Object.values(SPELLS).map(s=>s.req||0))-G.research);return 'all spells unlocked';}],
   ['Restore Heart',()=>{G.heartHP=G.heartMax;return 'Heart restored';}],
   ['Free imp',()=>{const r=[];for(let i=0;i<N;i++)if(G.t[i]===CLAIM)r.push(i);const i=r[rand(r.length)];spawn('imp',tx(i),ty(i));return 'free imp';}],
   ...['orc','warlock','troll','mistress'].map(k=>['+ '+KINDS[k].n,()=>{const p=G.portals.find(q=>G.pown[q]);const i=p!==undefined?p:ix(G.hx+2,G.hy);const e=spawn(k,tx(i),ty(i));fx({type:'ring',x:e.x,y:e.y,dur:.8,col:'#c58cff'});return KINDS[k].n+' summoned';}]),

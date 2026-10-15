@@ -66,7 +66,7 @@ class GameDefaultsTest extends TestCase
 
         $this->get("/admin/creatures/{$troll->getKey()}/edit")
             ->assertOk()
-            ->assertSee('Default: 170')
+            ->assertSee('Default: 110')
             ->assertSee('Default: lair 9, hatchery 9');
 
         $this->get('/admin/settings')->assertOk()->assertSee('Gold you start every game with.');
