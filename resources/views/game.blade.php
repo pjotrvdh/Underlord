@@ -66,9 +66,6 @@
       <h2>Cheats</h2>
       <div class="cgrid" id="cheatList"></div>
     </div>
-    @if ($version)
-      <div class="version" title="Commit {{ $version['hash'] }}, {{ $version['time'] }}">{{ $version['hash'] }} · {{ $version['time'] }}</div>
-    @endif
     <div class="zoom"><button id="zin" type="button" title="Zoom in">+</button><button id="zout" type="button" title="Zoom out">−</button><button id="zfit" class="fit" type="button" title="Show the whole map">Fit</button></div>
     <div class="overlay" id="ov">
       <div class="card">
@@ -124,6 +121,9 @@
     </section>
     <div class="info" id="info">Hover over the map for details.</div>
     <section><h2>Chronicle</h2><ul class="log" id="log"></ul></section>
+    @if ($version)
+      <p class="version" title="Commit {{ $version['hash'] }}, {{ $version['time'] }}">{{ $version['hash'] }} · {{ $version['time'] }}</p>
+    @endif
   </aside>
 </div>
 </body>
