@@ -27,19 +27,19 @@
       <!-- Hidden until someone types the cheat code (iliketocheat); see src/game/underlord.js. -->
       <button id="bCheat" type="button" aria-expanded="false" aria-controls="cheats" hidden>Cheats</button>
       <button id="bPause" type="button">Pause</button>
-      <button id="bSpeed" type="button">1×</button>
+      <button id="bSpeed" type="button" aria-label="Game speed: 1×">1×</button>
     </div>
   </header>
 
   <main class="stage" id="stage">
-    <canvas id="cv"></canvas>
-    <div class="banner" id="banner"></div>
+    <canvas id="cv" aria-label="Dungeon map. Click to dig, build or cast; drag to mark an area; right-click to slap."></canvas>
+    <div class="banner" id="banner" aria-hidden="true"></div>
     <div class="tip" id="tip" hidden></div>
     <div class="cheats" id="cheats" hidden>
       <h2>Cheats</h2>
       <div class="cgrid" id="cheatList"></div>
     </div>
-    <div class="zoom"><button id="zin" type="button" title="Zoom in">+</button><button id="zout" type="button" title="Zoom out">−</button><button id="zfit" class="fit" type="button" title="Show the whole map">Fit</button></div>
+    <div class="zoom"><button id="zin" type="button" title="Zoom in" aria-label="Zoom in">+</button><button id="zout" type="button" title="Zoom out" aria-label="Zoom out">−</button><button id="zfit" class="fit" type="button" title="Show the whole map" aria-label="Show the whole map">Fit</button></div>
     <div class="overlay" id="ov">
       <div class="card">
         <h2><img src="./src/assets/brand/logo.svg" alt="Underlord"></h2>
@@ -76,25 +76,25 @@
     </div>
     <div><div class="tools hand" id="tHand"></div><div class="held" id="held" hidden></div></div>
     <div class="tabs" role="tablist" id="tabs">
-      <button type="button" role="tab" data-tab="info" title="Information">?<span>Info</span></button>
-      <button type="button" role="tab" data-tab="rooms" title="Rooms">▦<span>Rooms</span></button>
-      <button type="button" role="tab" data-tab="spells" title="Spells">✦<span>Spells</span></button>
-      <button type="button" role="tab" data-tab="creatures" title="Creatures">☗<span>Creatures</span></button>
+      <button type="button" role="tab" id="tabbtn-info" data-tab="info" aria-controls="tab-info" title="Information">?<span>Info</span></button>
+      <button type="button" role="tab" id="tabbtn-rooms" data-tab="rooms" aria-controls="tab-rooms" title="Rooms">▦<span>Rooms</span></button>
+      <button type="button" role="tab" id="tabbtn-spells" data-tab="spells" aria-controls="tab-spells" title="Spells">✦<span>Spells</span></button>
+      <button type="button" role="tab" id="tabbtn-creatures" data-tab="creatures" aria-controls="tab-creatures" title="Creatures">☗<span>Creatures</span></button>
     </div>
-    <section class="tab" id="tab-info" role="tabpanel">
+    <section class="tab" id="tab-info" role="tabpanel" aria-labelledby="tabbtn-info">
       <div class="gauge"><div class="glabel"><span>Payday</span><b id="gPayTxt"></b></div><div class="gbar"><i id="gPay"></i></div></div>
       <div class="gauge"><div class="glabel"><span>Research</span><b id="gResTxt"></b></div><div class="gbar res"><i id="gRes"></i></div></div>
       <h3>Portal</h3><ul class="pool" id="pool"></ul>
     </section>
-    <section class="tab" id="tab-rooms" role="tabpanel" hidden><div class="tools" id="tRooms"></div></section>
-    <section class="tab" id="tab-spells" role="tabpanel" hidden><div class="tools" id="tSpells"></div></section>
-    <section class="tab" id="tab-creatures" role="tabpanel" hidden>
+    <section class="tab" id="tab-rooms" role="tabpanel" aria-labelledby="tabbtn-rooms" hidden><div class="tools" id="tRooms"></div></section>
+    <section class="tab" id="tab-spells" role="tabpanel" aria-labelledby="tabbtn-spells" hidden><div class="tools" id="tSpells"></div></section>
+    <section class="tab" id="tab-creatures" role="tabpanel" aria-labelledby="tabbtn-creatures" hidden>
       <div class="crgrid" id="crGrid"></div>
       <p class="crhint">Click a number to pick up a creature doing that. Right-click to look at it. Click a portrait to pick up the most experienced one.</p>
       <ul class="crlist" id="crList"></ul>
     </section>
     <div class="info" id="info">Hover over the map for details.</div>
-    <section><h2>Chronicle</h2><ul class="log" id="log"></ul></section>
+    <section><h2>Chronicle</h2><ul class="log" id="log" role="log" aria-live="polite" aria-label="Chronicle"></ul></section>
     <p class="version" id="version" hidden></p>
   </aside>
 </div>

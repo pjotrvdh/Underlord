@@ -997,7 +997,7 @@ function ui(){
     for(const k of CR_ORDER()){const of=mine.filter(e=>e.kind===k&&!e.held);const held=G.held.filter(e=>e.kind===k).length;if(!of.length&&!held)continue;
       const src=ASSETS['units.'+k],cnt=a=>of.filter(e=>activity(e)===a).length;
       gh+='<button type="button" class="who" data-k="'+k+'" title="Pick up the most experienced '+KINDS[k].n+'">'+(src?'<img src="'+src+'" alt="">':'<i style="background:'+KINDS[k].col+'"></i>')+'<span>'+KINDS[k].n+(held?' <small>('+held+' in hand)</small>':'')+'</span></button>';
-      for(const a of['idle','working','fighting']){const n=cnt(a);gh+='<button type="button" class="num'+(a==='fighting'&&n?' f':'')+'" data-k="'+k+'" data-a="'+a+'"'+(n?'':' disabled')+'>'+n+'</button>';}}
+      for(const a of['idle','working','fighting']){const n=cnt(a);gh+='<button type="button" class="num'+(a==='fighting'&&n?' f':'')+'" data-k="'+k+'" data-a="'+a+'" aria-label="'+n+' '+a+' '+KINDS[k].n+(n?': pick one up':'')+'"'+(n?'':' disabled')+'>'+n+'</button>';}}
     if(gh.split('class="who"').length===1)gh+='<span class="h" style="grid-column:1/-1;text-align:left">No creatures yet.</span>';
     const g=$('crGrid');if(g.innerHTML!==gh)g.innerHTML=gh;
     const list=mine.concat().filter(e=>e.kind!=='imp').sort((a,b)=>CR_ORDER().indexOf(a.kind)-CR_ORDER().indexOf(b.kind)||b.lvl-a.lvl);
@@ -1033,7 +1033,7 @@ function drawMini(){
 }
 function syncPause(){document.getElementById('bPause').textContent=paused?'Resume':'Pause';}
 document.getElementById('bPause').onclick=()=>{paused=!paused;syncPause();};
-function setSpeed(n){speed=n;document.getElementById('bSpeed').textContent=n+'×';}
+function setSpeed(n){speed=n;const b=document.getElementById('bSpeed');b.textContent=n+'×';b.setAttribute('aria-label','Game speed: '+n+'×');}
 document.getElementById('bSpeed').onclick=()=>setSpeed(speed===1?2:speed===2?3:1);
 document.getElementById('zin').onclick=()=>zoomAt(Z*1.25,SW/2,SH/2);
 document.getElementById('zout').onclick=()=>zoomAt(Z/1.25,SW/2,SH/2);

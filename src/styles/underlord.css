@@ -33,7 +33,7 @@ h1 img{display:block;height:46px;width:auto}
 button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
 button:hover:not(:disabled){border-color:#5a4033;background:#261b17}
 button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
-button:disabled{opacity:.4;cursor:not-allowed}
+button:disabled{color:var(--muted);background:var(--panel);border-style:dashed;cursor:not-allowed}
 .stage{position:relative;min-height:0;min-width:0;background:#050404;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 canvas{display:block;touch-action:none;cursor:crosshair;position:absolute;inset:0}
 canvas.grab{cursor:grab}
@@ -105,7 +105,7 @@ aside h2{font-family:var(--f-body);font-weight:500;font-size:19px;margin:0 0 6px
 .log li:first-child{color:var(--ink)}
 .log li.bad{color:#f08a7e}
 .log li.good{color:#d9c27a}
-.version{margin:auto 0 0;text-align:right;font-size:11px;color:var(--muted);opacity:.7;font-variant-numeric:tabular-nums}
+.version{margin:auto 0 0;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,5,5,.84);padding:16px;text-align:center;overflow-y:auto}
 .card{max-width:500px;display:flex;flex-direction:column;gap:10px;align-items:center}
 .card h2{margin:0;line-height:0}
