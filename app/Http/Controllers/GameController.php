@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AppVersion;
 use App\Services\GameConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class GameController extends Controller
 {
-    public function __construct(private readonly GameConfig $config) {}
+    public function __construct(private readonly GameConfig $config, private readonly AppVersion $version) {}
 
     public function show(): View
     {
@@ -20,6 +21,7 @@ class GameController extends Controller
                 'csrf' => csrf_token(),
             ],
             'static' => null,
+            'version' => $this->version->current(),
         ]);
     }
 

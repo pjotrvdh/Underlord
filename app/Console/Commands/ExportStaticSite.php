@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\AppVersion;
 use App\Services\GameConfig;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -18,7 +19,7 @@ use Illuminate\Filesystem\Filesystem;
 #[Description('Export a static, playable copy of the game (config defaults, localStorage saves) for GitHub Pages')]
 class ExportStaticSite extends Command
 {
-    public function handle(GameConfig $config, Filesystem $files): int
+    public function handle(GameConfig $config, AppVersion $version, Filesystem $files): int
     {
         $manifestPath = public_path('build/manifest.json');
         if (! $files->exists($manifestPath)) {
@@ -54,6 +55,7 @@ class ExportStaticSite extends Command
                 'csrf' => null,
             ],
             'static' => ['css' => 'build/'.$css, 'js' => 'build/'.$js],
+            'version' => $version->current(),
         ])->render();
 
         $files->put($out.'/index.html', $html);

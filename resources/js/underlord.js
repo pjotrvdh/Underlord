@@ -190,7 +190,7 @@ function spawn(kind,x,y,mult=1){
   const k=KINDS[kind];
   const e={id:G.idc++,kind,side:k.side||0,x:x+.5,y:y+.5,hp:k.hp*mult,maxhp:k.hp*mult,atk:k.atk*mult,lvl:1,xp:0,
     state:k.side?'march':'think',path:[],next:null,nextT:0,timer:0,cd:0,carry:0,hunger:Math.random()*40,slap:0,
-    resv:-1,target:null,repath:0,scan:Math.random()*.5,ignoreT:0,dead:false,held:false,face:1,task:-1,guard:false};
+    resv:-1,bed:-1,target:null,repath:0,scan:Math.random()*.5,ignoreT:0,dead:false,held:false,face:1,task:-1,guard:false};
   G.ents.push(e);return e;
 }
 function reserve(e,i){e.resv=i;G.res.set(i,(G.res.get(i)||0)+1);}
@@ -273,17 +273,29 @@ function doClaim(e,dt){
 }
 
 function creatures(){return G.ents.filter(e=>e.side===0&&e.kind!=='imp'&&!e.dead);}
+// Beds (Dungeon Keeper style): every creature claims one Lair tile as its own bed. Nobody else sleeps there,
+// and the bed is freed when the creature dies or leaves, or when the tile stops being a Lair.
+function bedOwner(i,except){return G.ents.find(o=>o!==except&&!o.dead&&o.side===0&&o.bed===i);}
+function hasBed(e){return e.bed>=0&&G.room[e.bed]===LAIR;}
+function toBed(e){
+  const here=ti(e);if(!hasBed(e))e.bed=-1;
+  if(e.bed>=0)return bfs(here,i=>i===e.bed);
+  if(!G.rc[LAIR])return null;
+  const p=bfs(here,i=>G.room[i]===LAIR&&!bedOwner(i,e));
+  if(p)e.bed=p.length?p[p.length-1]:here;
+  return p;
+}
 const frontier=i=>nb(i,j=>!G.seen[j])>=0;
 function creatureThink(e){
   release(e);const here=ti(e);
   if(G.rally&&G.time<G.rally.until){const p=bfs(here,i=>i===G.rally.i);if(p){go(e,p,'idle',1);return;}}
-  if(e.hp<e.maxhp*.5&&G.rc[LAIR]){const p=bfs(here,i=>G.room[i]===LAIR,6);if(p){go(e,p,'sleep');return;}}
+  if(e.hp<e.maxhp*.5){const p=toBed(e);if(p){go(e,p,'sleep');return;}}
   if(e.hunger>=100&&G.rc[HATCH]){const p=bfs(here,i=>G.room[i]===HATCH,6);if(p){go(e,p,'eat',2.5);return;}}
   if(e.kind==='warlock'&&G.rc[LIB]&&Math.random()<.8){const p=bfs(here,i=>G.room[i]===LIB,6);if(p){go(e,p,'study',8);return;}}
   if(G.rc[TRAIN]&&G.money>20&&e.lvl<10&&Math.random()<.6){const p=bfs(here,i=>G.room[i]===TRAIN,6);if(p){go(e,p,'train',8);return;}}
   if(Math.random()<.35){const p=bfs(here,i=>frontier(i)||G.loot[i]>0,3,walk,40);if(p&&p.length){go(e,p,'idle',1.5);return;}}
   if(G.rc[LIB]&&Math.random()<.5){const p=bfs(here,i=>G.room[i]===LIB,6);if(p){go(e,p,'study',8);return;}}
-  let p=G.rc[LAIR]?bfs(here,i=>G.room[i]===LAIR,6):null;
+  let p=toBed(e);
   if(!p)p=bfs(here,i=>G.t[i]===CLAIM,8,walk,5);
   if(p)go(e,p,'idle',2+Math.random()*3);else{e.state='idle';e.timer=2;}
 }
@@ -378,7 +390,7 @@ function tick(e,dt){
     case 'dig':doDig(e,dt);break;
     case 'claim':doClaim(e,dt);break;
     case 'reinforce':doReinforce(e,dt);break;
-    case 'sleep':if(G.room[ti(e)]!==LAIR){e.state='think';break;}e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.06*dt);if(e.hp>=e.maxhp)e.state='think';break;
+    case 'sleep':if(ti(e)!==e.bed||!hasBed(e)){e.state='think';break;}e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.06*dt);if(e.hp>=e.maxhp)e.state='think';break;
     case 'eat':if(G.room[ti(e)]!==HATCH){e.state='think';break;}if((e.timer-=dt)<=0){e.hunger=0;e.hp=Math.min(e.maxhp,e.hp+e.maxhp*.15);e.state='think';}break;
     case 'train':if(G.room[ti(e)]!==TRAIN||G.money<=0){e.state='think';break;}G.money=Math.max(0,G.money-ECON.trainCost*dt);gainXP(e,(e.kind==='troll'?11:9)*(e.boost||1)*dt);if((e.timer-=dt)<=0)e.state='think';break;
     case 'study':if(G.room[ti(e)]!==LIB){e.state='think';break;}research(dt*(e.kind==='warlock'?4:1.2)*(e.boost||1));if((e.timer-=dt)<=0)e.state='think';break;
@@ -454,7 +466,7 @@ function msg(text,key,cls=''){
 }
 
 /* ---------- save / load ---------- */
-const SAVE_V=2;const SAVE_KEYS=['id','kind','side','x','y','hp','maxhp','atk','lvl','xp','carry','hunger','guard'];
+const SAVE_V=2;const SAVE_KEYS=['id','kind','side','x','y','hp','maxhp','atk','lvl','xp','carry','hunger','guard','bed'];
 function serialize(){
   return {v:SAVE_V,savedAt:Date.now(),
     t:Array.from(G.t),room:Array.from(G.room),mark:Array.from(G.mark),hp:Array.from(G.hp),gold:Array.from(G.gold),seen:Array.from(G.seen),loot:Array.from(G.loot),
@@ -573,8 +585,10 @@ function drawRoom(i,r,px,py,s,now,x,y){
   const R=ROOMS[r];
   if(r===TREAS){rr(px,py,s,s,'rgba(227,178,60,.10)');const f=Math.max(0,Math.min(1,(G.money-HEART_CAP)/(TREAS_CAP*G.rc[TREAS])));
     if(f>0&&!spr('props.treasury-pile',px+s*(.5-(.2+.28*f)),py+s*(.92-(.4+.56*f)),s*(.4+.56*f),s*(.4+.56*f))){const rad=s*(.12+.24*f);circ(px+s/2,py+s*.6,rad,'#b8851c');circ(px+s/2,py+s*.6-rad*.25,rad*.75,'#e3b23c');circ(px+s/2-rad*.3,py+s*.6-rad*.45,rad*.22,'#fff0b0');}}
-  else if(r===LAIR){rr(px,py,s,s,'rgba(110,80,170,.14)');if(!spr('props.lair-nest',px+s*.04,py+s*.04,s*.92,s*.92)){ctx.fillStyle='#3a2c22';ctx.beginPath();ctx.ellipse(px+s/2,py+s*.55,s*.34,s*.24,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#140e0b';ctx.beginPath();ctx.ellipse(px+s/2,py+s*.55,s*.22,s*.13,0,0,Math.PI*2);ctx.fill();}}
+  else if(r===LAIR){rr(px,py,s,s,'rgba(110,80,170,.14)');if(beds.has(i)&&!spr('props.lair-nest',px+s*.04,py+s*.04,s*.92,s*.92)){ctx.fillStyle='#3a2c22';ctx.beginPath();ctx.ellipse(px+s/2,py+s*.55,s*.34,s*.24,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#140e0b';ctx.beginPath();ctx.ellipse(px+s/2,py+s*.55,s*.22,s*.13,0,0,Math.PI*2);ctx.fill();}
+    // the owner's colour marks whose bed it is
+    if(beds.has(i)){circ(px+s*.82,py+s*.18,s*.11,'#2b1b12');circ(px+s*.82,py+s*.18,s*.08,KINDS[beds.get(i)].col);}}
   else if(r===HATCH){rr(px,py,s,s,'rgba(180,150,50,.13)');ctx.strokeStyle='rgba(216,176,74,.35)';ctx.lineWidth=1;ctx.beginPath();
     for(let k=0;k<4;k++){const a=hash(x,y,k+30)*Math.PI;const cx=px+s*(.2+.6*hash(x,y,k+31)),cy=py+s*(.2+.6*hash(x,y,k+32));ctx.moveTo(cx-Math.cos(a)*s*.12,cy-Math.sin(a)*s*.12);ctx.lineTo(cx+Math.cos(a)*s*.12,cy+Math.sin(a)*s*.12);}ctx.stroke();
   }
@@ -677,6 +691,7 @@ function clampCam(){
 }
 function zoomAt(nz,sx,sy){nz=Math.max(1,Math.min(4,nz));const wx=(sx-cam.x)/TS,wy=(sy-cam.y)/TS;Z=nz;TS=BASE*Z;cam.x=sx-wx*TS;cam.y=sy-wy*TS;clampCam();}
 function centerOn(x,y){cam.x=SW/2-(x+.5)*TS;cam.y=SH/2-(y+.5)*TS;clampCam();}
+let beds=new Map(); // Lair tile -> kind of the creature that claimed it as its bed: only those tiles show a nest.
 function draw(){
   const now=performance.now()/1000,s=TS;
   ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -684,12 +699,13 @@ function draw(){
   setWorld();
   rr(0,0,W*s,H*s,'#070505');
   const x0=Math.max(0,Math.floor(-cam.x/s)),x1=Math.min(W-1,Math.floor((SW-cam.x)/s)),y0=Math.max(0,Math.floor(-cam.y/s)),y1=Math.min(H-1,Math.floor((SH-cam.y)/s));
-  // Terrain is cached in `terr` and only redrawn when a visible tile, the view or the treasury fill changes.
+  // Terrain is cached in `terr` and only redrawn when a visible tile, the view, the treasury fill or a bed changes.
+  beds=new Map(G.ents.filter(e=>!e.dead&&hasBed(e)).map(e=>[e.bed,e.kind]));
   let sig=0;
   for(let y=Math.max(0,y0-1);y<=Math.min(H-1,y1+1);y++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x1+1);x++){const i=ix(x,y);
     sig=(Math.imul(sig,31)+(G.t[i]|G.room[i]<<4|G.mark[i]<<7|G.seen[i]<<8|(G.loot[i]>0)<<9|(G.t[i]===WALL&&G.hp[i]<WALL_HP)<<10))|0;}
   const tf=G.rc[TREAS]?Math.round(10*Math.max(0,Math.min(1,(G.money-HEART_CAP)/(TREAS_CAP*G.rc[TREAS])))):0;
-  const key=sig+'|'+cam.x+'|'+cam.y+'|'+TS+'|'+cv.width+'|'+tf+'|'+Object.keys(IMG).length;
+  const key=sig+'|'+cam.x+'|'+cam.y+'|'+TS+'|'+cv.width+'|'+tf+'|'+Object.keys(IMG).length+'|'+[...beds].map(([i,k])=>i+k).sort().join(',');
   if(key!==terrKey){terrKey=key;if(terr.width!==cv.width||terr.height!==cv.height){terr.width=cv.width;terr.height=cv.height;}
     const tc=terr.getContext('2d');tc.setTransform(1,0,0,1,0,0);tc.clearRect(0,0,terr.width,terr.height);
     ctx=tc;setWorld();for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const t=G.t[ix(x,y)];if(t!==LAVA)drawTile(x,y,0);}ctx=mainCtx;}
@@ -743,7 +759,9 @@ function toolValid(i){
 function dropHeld(i){
   const d=G.held.pop();d.held=false;d.x=tx(i)+.5;d.y=ty(i)+.5;d.path=[];d.scan=0;d.target=null;
   const r=G.room[i],k=d.kind!=='imp';
-  d.after=k&&r===TRAIN&&G.money>0?['train',8]:k&&r===LIB?['study',8]:k&&r===LAIR?['sleep',0]:k&&r===HATCH?['eat',2.5]:null;
+  // Dropped on a free Lair tile, a creature moves its bed there; another creature's bed stays locked.
+  const bed=k&&r===LAIR&&!bedOwner(i,d);if(bed)d.bed=i;
+  d.after=k&&r===TRAIN&&G.money>0?['train',8]:k&&r===LIB?['study',8]:bed?['sleep',0]:k&&r===HATCH?['eat',2.5]:null;
   d.boost=d.after?CFG.hand.workBoost:1;d.state='stun';d.timer=CFG.hand.dropStun;
   fx({type:'ring',x:d.x,y:d.y,dur:.4,col:'#eadcc6'});fx({type:'dust',x:d.x,y:d.y+.3,dur:.4,col:'#8a6446'});
 }

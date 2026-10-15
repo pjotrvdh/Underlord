@@ -10,9 +10,10 @@ The game runs on Laravel. Its settings (economy, creatures, rooms, spells and wa
 - **Walls:** idle imps reinforce the earth walls around your territory. Heroes take much longer to tunnel through a reinforced wall.
 - **Explore:** the map is hidden in clouds. Your units reveal what they can see, and walls block their sight. Gold seams and the two portals shine through the clouds. Hidden caverns hold treasure chests, wandering creatures that join you, and a camp of sleeping heroes.
 - **Build:** you build rooms on claimed ground by clicking a tile or dragging a rectangle. The rooms are Treasury, Lair, Hatchery, Training Room and Library.
-- **Creatures:** creatures only arrive through a portal you have claimed. Each one needs a free bed in your Lair. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
+- **Creatures:** creatures only arrive through a portal you have claimed. Each one claims its own bed (a Lair tile) the first time it needs one; that tile is then locked for the others. Stronger creatures also need rooms of 9 or more tiles. Each map has a limited pool of creatures, and they want their wages on payday.
 - **Hand:** left-click a creature to pick it up (you can hold up to 8), then left-click your territory to drop it.
-  - A creature dropped into a Training Room, Library, Lair or Hatchery starts working there right away, with a small bonus.
+  - A creature dropped into a Training Room, Library or Hatchery starts working there right away, with a small bonus.
+  - Dropped on a free Lair tile, a creature moves its bed there and goes to sleep. Another creature's bed stays locked.
   - A dropped creature is dazed for a moment.
   - Dropping a creature on your own portal dismisses it.
   - Right-click slaps a creature; slapped imps work faster.
