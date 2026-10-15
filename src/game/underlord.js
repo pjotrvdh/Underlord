@@ -116,8 +116,9 @@ function genMap(){
     for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const x=hx+dx,y=hy+dy;if(x>0&&y>0&&x<W-1&&y<H-1)t[ix(x,y)]=EARTH;}
     for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const x=hx+dx,y=hy+dy;if(x>0&&y>0)t[ix(x,y)]=(Math.abs(dx)<=1&&Math.abs(dy)<=1)?HEART:CLAIM;}
     for(let y=hy-2;y<=hy+1;y++)t[ix(hx+5,y)]=GOLD;
+    // One portal, a short tunnel from the Heart: above or below it, just past the gold seam.
     const up=Math.random()<.5,portals=[];
-    for(const[px,py]of[[14+rand(5),hy+(up?-7:7)],[24+rand(6),hy+(up?7:-7)+rand(3)-1]]){const x=px,y=Math.max(3,Math.min(H-4,py));
+    {const x=12+rand(3),y=hy+(up?-1:1)*(4+rand(3));
       for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[ix(x+dx,y+dy)]=FLOOR;t[ix(x,y)]=PORTAL;portals.push(ix(x,y));}
     const gx=W-4,gy=4+rand(H-8);
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)t[ix(gx+dx,gy+dy)]=FLOOR;
@@ -150,7 +151,7 @@ function newGame(){
   for(let i=0;i<N;i++)if(Math.hypot(tx(i)-G.hx,ty(i)-G.hy)<=4.3||G.portals.some(p=>Math.abs(tx(i)-tx(p))<=1&&Math.abs(ty(i)-ty(p))<=1))G.seen[i]=1;
   vision();
   document.getElementById('log').innerHTML='';
-  msg('Two portals glow in the dark. Dig a tunnel and claim one to attract creatures.');
+  msg('A portal glows in the dark near your Heart. Dig a tunnel and claim it to attract creatures.');
   msg('Click or drag over earth to mark it for digging.');
   msg('Build a Treasury: your Heart holds only '+HEART_CAP+' gold.');
   if(camInit)centerOn(G.hx,G.hy);
