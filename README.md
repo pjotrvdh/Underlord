@@ -2,7 +2,7 @@
 
 A browser game in the spirit of *Dungeon Keeper*. You are an evil overlord deep underground: dig into a cloud-covered map, claim territory, build rooms, attract creatures through portals and defend your Dungeon Heart against six invasions from the surface.
 
-The game is a static web page built with [Vite](https://vite.dev): no server, no database. All game data (settings, creatures, heroes, rooms, spells and waves) lives in plain JavaScript files under [`src/config`](src/config). Play it on [GitHub Pages](https://pjotrvdh.github.io/Underlord/). The original single-file version is on the [`legacy`](../../tree/legacy) branch.
+The game is a web page built with [Vite](https://vite.dev). All game data (settings, creatures, heroes, rooms, spells and waves) lives in plain JavaScript files under [`src/config`](src/config). Play it on [GitHub Pages](https://pjotrvdh.github.io/Underlord/).
 
 ## How to play
 
