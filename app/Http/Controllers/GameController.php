@@ -16,11 +16,10 @@ class GameController extends Controller
             'boot' => [
                 'config' => $this->config->toArray(),
                 'user' => auth()->user()?->only(['id', 'name']),
-                // Only admins get the cheats panel.
-                'isAdmin' => (bool) auth()->user()?->is_admin,
                 'saveUrl' => route('save.show'),
                 'csrf' => csrf_token(),
             ],
+            'static' => null,
         ]);
     }
 

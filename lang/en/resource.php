@@ -121,7 +121,7 @@ return [
             'saved_wave' => 'Saved at wave',
         ],
         'helpers' => [
-            'is_admin' => 'Admins can open this panel and use cheats. Everyone can play and save.',
+            'is_admin' => 'Admins can open this panel. Everyone can play and save.',
             'password' => 'Leave empty to keep the current password.',
         ],
         'plural' => 'Users',

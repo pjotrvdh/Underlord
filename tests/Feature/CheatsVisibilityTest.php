@@ -10,26 +10,28 @@ class CheatsVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const string HIDDEN_CHEATS_BUTTON = 'id="bCheat" type="button" aria-expanded="false" aria-controls="cheats" hidden';
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->withoutVite();
     }
 
-    public function test_guests_do_not_get_the_cheats_panel(): void
+    public function test_guests_get_the_hidden_cheats_panel(): void
     {
-        $this->get('/')->assertOk()->assertDontSeeHtml('id="bCheat"')->assertSeeHtml('"isAdmin":false');
+        $this->get('/')->assertOk()->assertSeeHtml(self::HIDDEN_CHEATS_BUTTON)->assertSeeHtml('id="cheats" hidden');
     }
 
-    public function test_players_who_are_not_admin_do_not_get_the_cheats_panel(): void
+    public function test_players_get_the_hidden_cheats_panel(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => false]))
-            ->get('/')->assertOk()->assertDontSeeHtml('id="bCheat"');
+            ->get('/')->assertOk()->assertSeeHtml(self::HIDDEN_CHEATS_BUTTON);
     }
 
-    public function test_admins_get_the_cheats_panel(): void
+    public function test_admins_also_have_to_type_the_cheat_code(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]))
-            ->get('/')->assertOk()->assertSeeHtml('id="bCheat"')->assertSeeHtml('"isAdmin":true');
+            ->get('/')->assertOk()->assertSeeHtml(self::HIDDEN_CHEATS_BUTTON);
     }
 }

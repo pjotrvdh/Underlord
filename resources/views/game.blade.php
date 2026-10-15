@@ -3,17 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  @unless ($static)
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+  @endunless
   <title>Underlord</title>
-  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ $static ? 'favicon.svg' : asset('favicon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
   <script>
-    // Settings come from the database (admin panel at /admin); see App\Services\GameConfig.
+    // Settings come from the database (admin panel at /admin), or from the config defaults in the
+    // static build; see App\Services\GameConfig.
     window.UNDERLORD = @json($boot);
   </script>
-  @vite(['resources/css/underlord.css', 'resources/js/underlord.js'])
+  @if ($static)
+    <link rel="stylesheet" href="{{ $static['css'] }}">
+    <script type="module" src="{{ $static['js'] }}"></script>
+  @else
+    @vite(['resources/css/underlord.css', 'resources/js/underlord.js'])
+  @endif
 </head>
 <body>
 <div class="app">
@@ -29,21 +37,22 @@
       <div class="stat heart"><small>Dungeon Heart</small><div class="hbar"><i id="sHeart"></i></div></div>
     </div>
     <div class="ctrl">
-      @if (app('impersonate')->isImpersonating())
-        <a class="btn" href="{{ route('filament-impersonate.leave') }}" title="Go back to your own admin account">Stop playing as {{ auth()->user()->name }}</a>
-      @endif
-      @auth
-        <span class="saved" title="Your games are saved to this account">{{ auth()->user()->name }}</span>
-        <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Log out</button></form>
-      @else
-        <a class="btn" href="{{ route('login') }}" title="Log in to save your games to your account">Log in</a>
-      @endauth
+      @unless ($static)
+        @if (app('impersonate')->isImpersonating())
+          <a class="btn" href="{{ route('filament-impersonate.leave') }}" title="Go back to your own admin account">Stop playing as {{ auth()->user()->name }}</a>
+        @endif
+        @auth
+          <span class="saved" title="Your games are saved to this account">{{ auth()->user()->name }}</span>
+          <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Log out</button></form>
+        @else
+          <a class="btn" href="{{ route('login') }}" title="Log in to save your games to your account">Log in</a>
+        @endauth
+      @endunless
       <span class="saved" id="savedAt"></span>
       <button id="bSave" type="button">Save</button>
       <button id="bLoad" type="button">Load</button>
-      @if ($boot['isAdmin'])
-        <button id="bCheat" type="button" aria-expanded="false" aria-controls="cheats">Cheats</button>
-      @endif
+      {{-- Hidden until someone types the cheat code (iliketocheat); see underlord.js. --}}
+      <button id="bCheat" type="button" aria-expanded="false" aria-controls="cheats" hidden>Cheats</button>
       <button id="bPause" type="button">Pause</button>
       <button id="bSpeed" type="button">1×</button>
     </div>
@@ -53,12 +62,10 @@
     <canvas id="cv"></canvas>
     <div class="banner" id="banner"></div>
     <div class="tip" id="tip" hidden></div>
-    @if ($boot['isAdmin'])
-      <div class="cheats" id="cheats" hidden>
-        <h2>Cheats</h2>
-        <div class="cgrid" id="cheatList"></div>
-      </div>
-    @endif
+    <div class="cheats" id="cheats" hidden>
+      <h2>Cheats</h2>
+      <div class="cgrid" id="cheatList"></div>
+    </div>
     <div class="zoom"><button id="zin" type="button" title="Zoom in">+</button><button id="zout" type="button" title="Zoom out">−</button><button id="zfit" class="fit" type="button" title="Show the whole map">Fit</button></div>
     <div class="overlay" id="ov">
       <div class="card">

@@ -1030,11 +1030,16 @@ const CHEATS=[
   ['Next wave now',()=>{if(G.wave>=WAVES.length)return 'no waves left';G.nextWave=0;return 'next wave called';}],
   ['Defeat heroes',()=>{let n=0;for(const e of G.ents)if(e.side===1&&!e.dead){kill(e);n++;}return n+' heroes defeated';}],
 ];
-// Cheats are for admins only: the server leaves the panel out of the page for everyone else.
-if(BOOT.isAdmin)for(const[label,fn]of CHEATS){const b=document.createElement('button');b.type='button';b.textContent=label;
+// The Cheats panel is hidden until someone types the cheat code. It is not remembered: a reload locks it again.
+const CHEAT_CODE='iliketocheat';let cheatsOn=false,typed='';
+for(const[label,fn]of CHEATS){const b=document.createElement('button');b.type='button';b.textContent=label;
   b.onclick=()=>{if(!running||G.over)return;const r=fn();msg('Cheat: '+r+'.','cheat'+G.time+label,'good');};document.getElementById('cheatList').appendChild(b);}
-function toggleCheats(open){const c=document.getElementById('cheats'),b=document.getElementById('bCheat');if(!c||!b)return;open=open??c.hidden;c.hidden=!open;b.setAttribute('aria-expanded',String(open));}
-if(BOOT.isAdmin)document.getElementById('bCheat').onclick=()=>toggleCheats();
+function toggleCheats(open){const c=document.getElementById('cheats'),b=document.getElementById('bCheat');if(!c||!b||!cheatsOn)return;open=open??c.hidden;c.hidden=!open;b.setAttribute('aria-expanded',String(open));}
+function unlockCheats(){
+  cheatsOn=true;document.getElementById('bCheat').hidden=false;toggleCheats(true);
+  if(G)msg('Cheat mode unlocked.','cheatcode','good');
+}
+document.getElementById('bCheat').onclick=()=>toggleCheats();
 document.getElementById('tabs').onclick=ev=>{const b=ev.target.closest('button[data-tab]');if(b)showTab(b.dataset.tab);};
 document.getElementById('bCpu').onclick=()=>{G.cpu.on=!G.cpu.on;G.cpu.t=0;syncCpu();msg('Computer Assistant '+(G.cpu.on?'on ('+G.cpu.mode+')':'off')+'.','cpu'+G.time);};
 document.getElementById('cpuSeg').onclick=ev=>{const b=ev.target.closest('button[data-mode]');if(!b)return;G.cpu.mode=b.dataset.mode;syncCpu();};
@@ -1053,6 +1058,7 @@ document.getElementById('bSave').onclick=()=>{if(running)saveGame(false);};
 document.getElementById('bLoad').onclick=()=>loadGame();
 const keys=new Set();
 addEventListener('keydown',e=>{
+  if(!cheatsOn&&e.key.length===1){typed=(typed+e.key.toLowerCase()).slice(-CHEAT_CODE.length);if(typed===CHEAT_CODE){unlockCheats();return;}}
   if(e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
   if(e.key===' '||e.key==='p'){e.preventDefault();paused=!paused;syncPause();}
   else if(e.key==='Escape'){setTool('hand');drag=null;updateTip();toggleCheats(false);}

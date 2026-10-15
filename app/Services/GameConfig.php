@@ -29,6 +29,44 @@ class GameConfig
         return Cache::rememberForever(self::CACHE_KEY, fn (): array => $this->build());
     }
 
+    /**
+     * The same object as toArray(), built from the defaults in config/underlord only (no database),
+     * with asset paths relative to the page. Used for the static build (underlord:export-static).
+     *
+     * @return array<string, mixed>
+     */
+    public function defaults(): array
+    {
+        $creatures = ['creatures' => [], 'heroes' => []];
+        foreach (GameData::creatures() as $key => $c) {
+            $row = [
+                'name' => $c['name'], 'hp' => $c['hp'], 'attack' => $c['attack'],
+                'speed' => $c['speed'], 'range' => $c['range'], 'rate' => $c['rate'], 'color' => $c['color'],
+            ];
+            if ($c['side'] === Creature::SIDE_HERO) {
+                $creatures['heroes'][$key] = $row + ['bounty' => $c['bounty'] ?? 0, 'dig' => $c['dig'] ?? null, 'big' => $c['big'] ?? false];
+            } else {
+                $creatures['creatures'][$key] = $row + [
+                    'wage' => $c['wage'] ?? 0, 'vision' => $c['vision'] ?? 5, 'pool' => $c['pool'] ?? 0, 'attract' => $c['attract'] ?? [],
+                ];
+            }
+        }
+
+        $spells = [];
+        foreach (GameData::spells() as $key => $s) {
+            $spells[$key] = ['name' => $s['name'], 'research' => $s['research'], 'cost' => $s['cost']] + $s['params'];
+        }
+
+        return [
+            'game' => GameData::settings(),
+            'creatures' => $creatures,
+            'rooms' => ['rooms' => GameData::rooms()],
+            'spells' => ['spells' => $spells],
+            'waves' => ['waves' => GameData::waves()],
+            'assets' => GameData::assets(),
+        ];
+    }
+
     /** @return array<string, mixed> */
     private function build(): array
     {

@@ -18,6 +18,12 @@ Underlord is a Dungeon Keeper-style browser game on Laravel. The owner talks to 
 - **Assets** (SVGs) and the **colours** of creatures and rooms are managed in the project, not in the database: `config/underlord/assets.php`, `public/assets/` and the `color` entries in the config. The admin panel shows them read-only.
 - `App\Services\GameConfig` builds and caches the object the game reads. Model events clear that cache.
 
+## Static build
+
+`artisan underlord:export-static` writes a database-free copy of the game (config defaults through `GameConfig::defaults()`, relative paths, localStorage saves) for GitHub Pages; `.github/workflows/pages.yml` publishes it. `resources/views/game.blade.php` renders both versions: keep server-only parts (CSRF, login, impersonation) inside `@unless ($static)`.
+
+In both versions the Cheats panel is hidden for everyone until `iliketocheat` is typed; it is not remembered across reloads.
+
 ## Checks
 
 These are the same checks CI runs (`.github/workflows`):

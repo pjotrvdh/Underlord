@@ -15,4 +15,4 @@ Build forms with `App\Filament\Schemas\FormLayout`: a wide main section, and an 
 Game data resources use the `ManagedByApp` trait: no create or delete pages, actions or bulk actions. Handles (key, side, wave number) are shown, not editable.
 
 ## Access
-Only users with `is_admin` can open the panel or see the in-game Cheats menu. Admins can impersonate players.
+Only users with `is_admin` can open the panel. The in-game Cheats menu is not tied to admin: anyone unlocks it with the cheat code. Admins can impersonate players.

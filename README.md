@@ -19,6 +19,7 @@ The game runs on Laravel. Its settings (economy, creatures, rooms, spells and wa
 - **Spells:** Create Imp, Lightning, Heal and Call to Arms. You unlock the last three through research in the Library.
 - **Control panel:** a minimap at the top (click it to jump there), then Info, Rooms, Spells and Creatures tabs. The Creatures tab shows, for each type, how many are idle, working and fighting. Click a number to pick one of them up, or right-click it to look at it.
 - **Computer Assistant:** the **C** button on the minimap lets the computer play for you, in one of four modes: Aggressive, Defensive, Construction only or Move only.
+- **Cheats:** type `iliketocheat` during the game to unlock the Cheats panel. It works for everyone, and a reload locks it again.
 - **Saving:** logged-in players save to their account; guests save in their browser. The game also autosaves every two minutes.
 - **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
 
@@ -33,7 +34,7 @@ The game runs on Laravel. Its settings (economy, creatures, rooms, spells and wa
 | Pause | **Pause** button | `Space` / `P` |
 | Game speed | **1×** button | `1` `2` `3` |
 | Back to the hand tool | | `Esc` |
-| Cheats panel (admins only) | **Cheats** button | `` ` `` |
+| Cheats panel (after typing `iliketocheat`) | **Cheats** button | `` ` `` |
 
 ## Getting started
 
@@ -73,8 +74,15 @@ The game's data has its defaults in code, and its current values in the database
 
 ## Admin panel
 
-- Only users with **Admin** switched on can open `/admin`. They can also use the in-game Cheats menu.
+- Only users with **Admin** switched on can open `/admin`.
 - Admins manage players under **Players** and can play as a player (impersonate) to check their game and saves.
+
+## Static version (GitHub Pages)
+
+`ddev artisan underlord:export-static` builds a static copy of the game in `build/static` (run `ddev npm run build` first). It uses the default settings from `config/underlord/`, needs no database or server, and saves games in the browser's localStorage. All paths are relative, so it also works from a sub-path.
+
+- **Publishing:** the `github pages` workflow publishes it on every push to `main`.
+- **Cheats:** the cheat code works here too.
 
 ## Development
 
