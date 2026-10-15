@@ -2,7 +2,7 @@
 
 A browser game in the spirit of *Dungeon Keeper*. You are an evil overlord deep underground: dig into a cloud-covered map, claim territory, build rooms, attract creatures through portals and defend your Dungeon Heart against six invasions from the surface.
 
-The game runs on Laravel. Its settings (economy, creatures, rooms, spells and waves) live in the database, and admins edit them in a Filament admin panel. The original single-file version is on the [`legacy`](../../tree/legacy) branch.
+The game is a static web page built with [Vite](https://vite.dev): no server, no database. All game data (settings, creatures, heroes, rooms, spells and waves) lives in plain JavaScript files under [`src/config`](src/config). Play it on [GitHub Pages](https://pjotrvdh.github.io/Underlord/). The original single-file version is on the [`legacy`](../../tree/legacy) branch.
 
 ## How to play
 
@@ -20,8 +20,8 @@ The game runs on Laravel. Its settings (economy, creatures, rooms, spells and wa
 - **Spells:** Create Imp, Call to Arms, Heal and Lightning, in the research order of Dungeon Keeper. You unlock the last three through research in the Library. Call to Arms is free on your own territory.
 - **Control panel:** a minimap at the top (click it to jump there), then Info, Rooms, Spells and Creatures tabs. The Creatures tab shows, for each type, how many are idle, working and fighting. Click a number to pick one of them up, or right-click it to look at it.
 - **Computer Assistant:** the **C** button on the minimap lets the computer play for you, in one of four modes: Aggressive, Defensive, Construction only or Move only.
-- **Cheats:** type `iliketocheat` during the game to unlock the Cheats panel. It works for everyone, and a reload locks it again.
-- **Saving:** logged-in players save to their account; guests save in their browser. The game also autosaves every two minutes.
+- **Cheats:** type `iliketocheat` during the game to unlock the Cheats panel. A reload locks it again.
+- **Saving:** games are saved in your browser (localStorage). The game also autosaves every two minutes.
 - **Win:** survive all six hero waves. The last wave is led by the Lord of the Land. You lose when your Dungeon Heart is destroyed.
 
 ### Controls
@@ -39,62 +39,52 @@ The game runs on Laravel. Its settings (economy, creatures, rooms, spells and wa
 
 ## Getting started
 
-You need [Docker](https://www.docker.com/) and [DDEV](https://ddev.com/). Everything else runs inside DDEV.
+You need [Node.js](https://nodejs.org/) 24 or newer.
 
 ```bash
-ddev start
-ddev composer install
-ddev artisan migrate:fresh --seed
-ddev npm ci
-ddev npm run build
+npm ci
+npm run dev
 ```
-
-- **Game:** https://underlord.ddev.site
-- **Admin panel:** https://underlord.ddev.site/admin. Locally, a developer login is shown on the login page. The seeder creates `admin@underlord.test` with the password `password`.
-- **Front-end development:** run `ddev npm run dev` instead of `build` for hot reloading.
-
-## Game data
-
-The game's data has its defaults in code, and its current values in the database:
-
-| What | Defaults | Edited in |
-|---|---|---|
-| Settings (economy, Heart, portals, waves, …) | `config/underlord/settings.php` | admin panel → Settings |
-| Creatures and heroes | `config/underlord/creatures.php` | admin panel → Creatures |
-| Rooms | `config/underlord/rooms.php` | admin panel → Rooms |
-| Spells | `config/underlord/spells.php` | admin panel → Spells |
-| Hero waves | `config/underlord/waves.php` | admin panel → Waves |
-| SVG graphics | `config/underlord/assets.php` and `public/assets/` | the project only |
-
-- After every `migrate`, missing defaults are copied into the database. Records you edited in the admin panel are left alone.
-- To put everything back to the defaults, run `ddev artisan underlord:defaults --reset`.
-- In the admin panel, every field shows its default and turns orange when it has been changed.
-- Game data can only be edited there. New creatures, rooms or settings are added in `config/underlord/`.
-- The colours of creatures and rooms, and the SVGs, are managed in the project only.
-- See [`public/assets/README.md`](public/assets/README.md) for the size and orientation of the SVGs.
-
-## Admin panel
-
-- Only users with **Admin** switched on can open `/admin`.
-- Admins manage players under **Players** and can play as a player (impersonate) to check their game and saves.
-
-## Static version (GitHub Pages)
-
-`ddev artisan underlord:export-static` builds a static copy of the game in `build/static` (run `ddev npm run build` first). It uses the default settings from `config/underlord/`, needs no database or server, and saves games in the browser's localStorage. All paths are relative, so it also works from a sub-path.
-
-- **Publishing:** the `github pages` workflow publishes it on every push to `main`.
-- **Cheats:** the cheat code works here too.
-
-## Development
 
 | Command | What it does |
 |---|---|
-| `ddev composer test` | the test suite (PHPUnit, in-memory SQLite) |
-| `ddev composer analyse` | PHPStan/Larastan at the max level |
-| `ddev composer format-check` | Rector (dry run) and Pint |
-| `ddev composer format` | apply Rector and Pint |
+| `npm run dev` | start a dev server with hot reloading |
+| `npm run build` | build the game into `dist/` |
+| `npm run preview` | serve the build from `dist/` |
 
-GitHub Actions runs the same checks on every pull request, plus a Composer and npm security audit.
+The build uses relative paths, so `dist/` works from any folder or sub-path. The `github pages` workflow builds and publishes it on every push to `main`. The commit hash and time of the build are shown below the Chronicle.
 
-- **Migrations** only go forward: there are no `down()` methods, and mistakes are fixed with a new migration.
-- **AI agents:** the project uses [Laravel Boost](https://laravel.com/docs/ai). After cloning, run `ddev artisan boost:install` to generate the agent files (`AGENTS.md`, `CLAUDE.md`, MCP config). The project's own agent rules are in [`.ai/guidelines`](.ai/guidelines) and [`.ai/rules`](.ai/rules).
+## Project layout
+
+```
+index.html              the game page
+public/                 copied as-is into the build
+  assets/               SVG graphics (see public/assets/README.md)
+  favicon.svg
+src/
+  main.js               entry point: styles, game and the version label
+  game/underlord.js     the game itself
+  styles/underlord.css
+  config/               all game data, one file per item
+    index.js            puts everything together for the game
+    settings/           one file per group: economy, imp, heart, portal, waves, hand, assistant, walls
+    creatures/          your creatures: imp.js, orc.js, warlock.js, troll.js, mistress.js
+    heroes/             the invaders: tunneller.js, archer.js, wizard.js, knight.js, lord.js
+    rooms/              treasury.js, lair.js, hatchery.js, training.js, library.js
+    spells/             imp.js, bolt.js, heal.js, rally.js
+    waves.js            the hero invasions, in order
+    assets.js           which SVG the game draws for what
+```
+
+## Game data
+
+- Every creature, hero, room and spell has its own file, and every value is documented in it.
+- The `index.js` in each folder sets the order the game uses. To add something, add a file and list it there.
+- Keys are fixed: the game logic, the waves and the assets refer to them.
+- Only creatures and heroes from the original Dungeon Keeper (1997) belong in the game.
+- See [`public/assets/README.md`](public/assets/README.md) for the size and orientation of the SVGs.
+
+## Development
+
+- **Checks:** GitHub Actions builds every pull request and runs `npm audit`.
+- **AI agents:** the project rules for coding agents are in [`AGENTS.md`](AGENTS.md).
