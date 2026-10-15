@@ -57,22 +57,21 @@ npm run dev
 | Command | What it does |
 |---|---|
 | `npm run dev` | start a dev server with hot reloading |
-| `npm run build` | build the game into `dist/` |
-| `npm run preview` | serve the build from `dist/` |
+| `npm run build` | build the game into one file, `dist/index.html` |
+| `npm run preview` | serve the build |
 
-The build uses relative paths, so `dist/` works from any folder or sub-path. The `github pages` workflow builds and publishes it on every push to `main`. The commit hash and time of the build are shown below the Chronicle.
+The build is a single, self-contained HTML file: the JavaScript, the styles, the SVGs, the favicon and the font are all embedded in `dist/index.html`. You can open it straight from disk, put it anywhere or send it to someone, also offline. The `github pages` workflow builds and publishes it on every push to `main`. The commit hash and time of the build are shown below the Chronicle.
 
 ## Project layout
 
 ```
 index.html              the game page
 .ddev/                  DDEV: config.yaml and start-vite.sh, which runs the Vite dev server
-public/                 copied as-is into the build
-  assets/               SVG graphics (see public/assets/README.md)
-  favicon.svg
 src/
+  assets/               SVG graphics and the favicon (see src/assets/README.md)
   main.js               entry point: styles, game and the version label
   game/underlord.js     the game itself
+  styles/fonts.css      the OpenDyslexic font (embedded in the build)
   styles/underlord.css
   config/               all game data, one file per item
     index.js            puts everything together for the game
@@ -80,7 +79,7 @@ src/
     creatures/          your creatures: imp.js, orc.js, warlock.js, troll.js, mistress.js
     heroes/             the invaders: tunneller.js, archer.js, wizard.js, knight.js, lord.js
     rooms/              treasury.js, lair.js, hatchery.js, training.js, library.js
-    spells/             imp.js, bolt.js, heal.js, rally.js
+    spells/             imp.js, rally.js, heal.js, bolt.js
     waves.js            the hero invasions, in order
     assets.js           which SVG the game draws for what
 ```
@@ -91,7 +90,7 @@ src/
 - The `index.js` in each folder sets the order the game uses. To add something, add a file and list it there.
 - Keys are fixed: the game logic, the waves and the assets refer to them.
 - Only creatures and heroes from the original Dungeon Keeper (1997) belong in the game.
-- See [`public/assets/README.md`](public/assets/README.md) for the size and orientation of the SVGs.
+- See [`src/assets/README.md`](src/assets/README.md) for the size and orientation of the SVGs.
 
 ## Development
 

@@ -2,7 +2,7 @@
 
 All graphics are SVG files. You can restyle the game by editing them in any vector editor (Inkscape, Figma, Illustrator) or by hand. The game rasterises each SVG at the exact on-screen size, so the graphics stay sharp at every zoom level.
 
-[`config/underlord/assets.php`](../../config/underlord/assets.php) decides which file is used for what. Point an entry at a different file to swap it. Remove an entry to fall back to the built-in procedural drawing.
+[`src/config/assets.js`](../config/assets.js) decides which file is used for what. Point an entry at a different file to swap it. Remove an entry to fall back to the built-in procedural drawing. The build embeds every SVG in the HTML file.
 
 ## Conventions
 
